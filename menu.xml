@@ -1,0 +1,125 @@
+<menu>
+    <menuitem label='Home'>
+        <icon>fa:home fa-fw</icon>
+        <menu>
+            <menuitem label='Início'>
+                <icon>fa:life-ring fa-fw</icon>
+                <action>WelcomeView</action>
+            </menuitem>
+            
+            <menuitem label='Aprenda'>
+                <icon>fa:book fa-fw</icon>
+                <action>LearnView</action>
+            </menuitem>
+            
+            <menuitem label='Template'>
+                <icon>fa:desktop fa-fw</icon>
+                <action>TemplateView</action>
+            </menuitem>
+            
+            <menuitem label='Construa'>
+                <icon>fa:magic fa-fw</icon>
+                <action>BuildView</action>
+            </menuitem>
+        </menu>
+    </menuitem>
+    <menuitem label='Configuração'>
+        <icon>fa:cog fa-fw</icon>
+        <menu>
+            <menuitem label='Ver módulos'>
+                <icon>fa:cube fa-fw</icon>
+                <action>SystemModulesCheckView</action>
+            </menuitem>
+            
+            <menuitem label='Setup PHP'>
+                <icon>fa:code fa-fw</icon>
+                <action>SystemPHPInfoView</action>
+            </menuitem>
+        </menu>
+    </menuitem>
+    <menuitem label='Básico'>
+        <icon>fa:cog fa-fw</icon>
+        <menu>
+            <menuitem label='Teste'>
+                <icon>fa:circle fa-fw</icon>
+                <action>TestView#method=onEvento#nome=bruno</action>
+            </menuitem>
+            <menuitem label='Template Básico'>
+                <icon>fa:circle fa-fw</icon>
+                <action>TemplateViewBasico</action>
+            </menuitem>
+            <menuitem label='Template com máscara'>
+                <icon>fa:circle fa-fw</icon>
+                <action>TemplateViewMask</action>
+            </menuitem>
+            <menuitem label='Template com repetição'>
+                <icon>fa:circle fa-fw</icon>
+                <action>TemplateViewRepeat</action>
+            </menuitem>
+            <menuitem label='Página Simples'>
+                <icon>fa:circle fa-fw</icon>
+                <action>SinglePageView</action>
+            </menuitem>
+            <menuitem label='Janela Simples'>
+                <icon>fa:circle fa-fw</icon>
+                <action>SingleWindowView</action>
+            </menuitem>
+            <menuitem label='Janela sob demanda'>
+                <icon>fa:circle fa-fw</icon>
+                <action>OnDemandWindowView</action>
+            </menuitem>
+            <menuitem label='Janela modal'>
+                <icon>fa:circle fa-fw</icon>
+                <action>ModalWindowView</action>
+            </menuitem>
+            <menuitem label='Cortina lateral'>
+                <icon>fa:circle fa-fw</icon>
+                <action>SidePageView</action>
+            </menuitem>
+            <menuitem label='PDF embarcado'>
+                <icon>fa:circle fa-fw</icon>
+                <action>EmbeddedPDFView</action>
+            </menuitem>
+            <menuitem label='Vídeo embarcado'>
+                <icon>fa:circle fa-fw</icon>
+                <action>EmbeddedViewView</action>
+            </menuitem>
+            <menuitem label='Sistema embarcado'>
+                <icon>fa:circle fa-fw</icon>
+                <action>ExternalSystemView</action>
+            </menuitem>
+            <menuitem label='Tabela'>
+                <icon>fa:circle fa-fw</icon>
+                <action>TableView</action>
+            </menuitem>
+            <menuitem label='Painel de grupos'>
+                <icon>fa:circle fa-fw</icon>
+                <action>PanelGroupView</action>
+            </menuitem>
+            <menuitem label='Barra de rolagem'>
+                <icon>fa:circle fa-fw</icon>
+                <action>ScrollView</action>
+            </menuitem>
+            <menuitem label='Notebook'>
+                <icon>fa:circle fa-fw</icon>
+                <action>NotebookView</action>
+            </menuitem>
+            <menuitem label='Caixa vertical'>
+                <icon>fa:circle fa-fw</icon>
+                <action>VBoxView</action>
+            </menuitem>
+            <menuitem label='Diálogo de mensagem'>
+                <icon>fa:circle fa-fw</icon>
+                <action>InformationView</action>
+            </menuitem>
+            <menuitem label='Diálogo de pergunta'>
+                <icon>fa:circle fa-fw</icon>
+                <action>QuestionView</action>
+            </menuitem>
+            <menuitem label='Diálogo de input'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DialogInputView</action>
+            </menuitem>
+        </menu>
+    </menuitem>
+</menu>
