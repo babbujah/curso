@@ -8,7 +8,7 @@ class ObjectFind extends TPage{
             
             TTransaction::dump();
             
-            $produto = Produto::find( 8574 );
+            $produto = Produto::find( 2 );
             
             if( $produto instanceof Produto ){
                 echo '<b>Descrição</b>: ' . $produto->descricao;
