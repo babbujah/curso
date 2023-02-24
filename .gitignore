@@ -35,7 +35,14 @@ gera_class_path.php
 *.exe
 *.out
 *.app
+app/output
 
+# Database
 *.db
+
+# Config
+*.ini
+
+# Others
 tmp/
-app/output/
+
