@@ -8,7 +8,7 @@ class ObjectStamp extends TPage{
             
             TTransaction::dump();
             
-            /*
+            /*        
             $cliente = new Cliente;
             $cliente->nome = 'Registro teste';
             $cliente->endereco = 'Rua teste';
@@ -16,11 +16,13 @@ class ObjectStamp extends TPage{
             $cliente->categoria_id = 1;
             $cliente->cidade_id = 1;
             $cliente->store();
-            */
+            */            
             
             $cliente = Cliente::find(41);
             $cliente->nome = 'Registro teste alterado';
-            $cliente->store();            
+            $cliente->store();
+            
+            //$cliente->delete();            
             
             new TMessage('info', 'Cliente gravado com sucesso');
             
