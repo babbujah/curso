@@ -8,6 +8,9 @@ class Cliente extends TRecord{
     const PRIMARYKEY = 'id';
     const IDPOLICY = 'max'; // {max, serial}
     
+    const CREATEDAT = 'created_at';
+    const UPDATEDAT = 'updated_at';
+    
     private $cidade;
     private $categoria;
     
@@ -27,7 +30,7 @@ class Cliente extends TRecord{
         parent::addAttribute('categoria_id');
         parent::addAttribute('cidade_id');
         parent::addAttribute('created_at');
-        parent::addAttribute('update_at');
+        parent::addAttribute('updated_at');
         
     }
     
