@@ -8,6 +8,8 @@ class ClienteHabilidade extends TRecord{
     const PRIMARYKEY = 'id';
     const IDPOLICY = 'max'; // {max, serial}
     
+    private $habilidade;
+    
     /**
     * Constructor method
     **/
@@ -16,5 +18,13 @@ class ClienteHabilidade extends TRecord{
         
         parent::addAttribute('cliente_id');
         parent::addAttribute('habilidade_id');
+    }
+    
+    public function get_habilidade(){
+        if(empty($this->habilidade)){
+            $this->habilidade = new Habilidade($this->habilidade_id);
+        }
+        
+        return $this->habilidade;
     }
 }
