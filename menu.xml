@@ -228,6 +228,18 @@
                 <icon>fa:circle fa-fw</icon>
                 <action>FormularioBootstrap</action>
             </menuitem>
+            <menuitem label='Formulário Bootstrap Colunas'>
+                <icon>fa:circle fa-fw</icon>
+                <action>FormularioBootstrapColunas</action>
+            </menuitem>
+            <menuitem label='Formulário Bootstrap Vertical'>
+                <icon>fa:circle fa-fw</icon>
+                <action>FormularioBootstrapVertical</action>
+            </menuitem>
+            <menuitem label='Formulário Bootstrap Estático'>
+                <icon>fa:circle fa-fw</icon>
+                <action>FormularioBootstrapEstatico</action>
+            </menuitem>
         </menu>
     </menuitem>
 </menu>
