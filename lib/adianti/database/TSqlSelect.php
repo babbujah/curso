@@ -9,7 +9,7 @@ use PDO;
 /**
  * Provides an Interface to create SELECT statements
  *
- * @version    7.0
+ * @version    7.4
  * @package    database
  * @author     Pablo Dall'Oglio
  * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
@@ -37,7 +37,16 @@ class TSqlSelect extends TSqlStatement
     {
         $conn = TTransaction::get();
         $driver = $conn->getAttribute(PDO::ATTR_DRIVER_NAME);
-        
+
+        if ($this->criteria)
+        {
+            $dbInfo = TTransaction::getDatabaseInfo();
+            if(isset($dbInfo['case']) AND $dbInfo['case'] == 'insensitive')
+            {
+                $this->criteria->setCaseInsensitive(TRUE);
+            }
+        }
+
         if (in_array($driver, array('mssql', 'dblib', 'sqlsrv')))
         {
             return $this->getSqlServerInstruction( $prepared );
@@ -191,12 +200,8 @@ class TSqlSelect extends TSqlStatement
             {
                 $order = '(SELECT NULL)';
             }
-            $this->sql = "SELECT {$columns}
-                      FROM
-                      (
-                             SELECT ROW_NUMBER() OVER (order by {$order} {$direction}) AS __ROWNUMBER__,
-                             {$columns}
-                             FROM {$this->entity}";
+            $this->sql = "SELECT {$columns} FROM ( SELECT ROW_NUMBER() OVER (order by {$order} {$direction}) AS __ROWNUMBER__, {$columns} FROM {$this->entity}";
+            
             if (!empty($expression))
             {
                 $this->sql.= "    WHERE {$expression} ";
@@ -232,7 +237,7 @@ class TSqlSelect extends TSqlStatement
                 $this->sql .= ' WHERE ' . $expression;
             }
             
-            if ($group)
+            if (isset($group) AND !empty($group))
             {
                 $this->sql .= ' GROUP BY ' . $group;
             }
@@ -273,7 +278,7 @@ class TSqlSelect extends TSqlStatement
             $basicsql .= ' WHERE ' . $expression;
         }
         
-        if ($group)
+        if (isset($group) AND !empty($group))
         {
             $basicsql .= ' GROUP BY ' . $group;
         }

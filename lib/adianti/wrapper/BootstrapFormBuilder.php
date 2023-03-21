@@ -8,6 +8,7 @@ use Adianti\Widget\Base\TScript;
 use Adianti\Widget\Form\TField;
 use Adianti\Widget\Form\TForm;
 use Adianti\Widget\Form\TLabel;
+use Adianti\Widget\Form\TCheckButton;
 use Adianti\Widget\Form\TButton;
 use Adianti\Widget\Form\THidden;
 use Adianti\Widget\Form\TSlider;
@@ -22,6 +23,8 @@ use Adianti\Widget\Util\TActionLink;
 use Adianti\Widget\Wrapper\TDBRadioGroup;
 use Adianti\Widget\Wrapper\TDBCheckGroup;
 use Adianti\Widget\Wrapper\TDBSeekButton;
+use Adianti\Registry\TSession;
+use Adianti\Widget\Form\TCheckList;
 
 use stdClass;
 use Exception;
@@ -29,7 +32,7 @@ use Exception;
 /**
  * Bootstrap form builder for Adianti Framework
  *
- * @version    7.0
+ * @version    7.4
  * @package    wrapper
  * @author     Pablo Dall'Oglio
  * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
@@ -57,6 +60,7 @@ class BootstrapFormBuilder implements AdiantiFormInterface
     private $hidden;
     private $panel;
     private $client_validation;
+    private $csrf_validation;
     
     /**
      * Constructor method
@@ -75,6 +79,8 @@ class BootstrapFormBuilder implements AdiantiFormInterface
         $this->field_sizes       = null;
         $this->automatic_aria    = false;
         $this->client_validation = false;
+        $this->csrf_validation   = false;
+        $this->hidden            = false;
         
         $this->column_classes = array();
         $this->column_classes[1]  = ['col-sm-12'];
@@ -97,6 +103,39 @@ class BootstrapFormBuilder implements AdiantiFormInterface
     public function setClientValidation($bool)
     {
         $this->client_validation = $bool;
+    }
+    
+    /**
+     * Enable CSRF Protection
+     */
+    public function enableCSRFProtection()
+    {
+        $this->csrf_validation = true;
+        
+		TSession::setValue('csrf_token_'.$this->name.'_before', TSession::getValue('csrf_token_'.$this->name));
+		TSession::setValue('csrf_token_'.$this->name, bin2hex(random_bytes(32)));
+    }
+    
+    /**
+     * Add expand button
+     */
+    public function addExpandButton( $label = null, $icon = null, $start_hidden = true)
+    {
+        $form_name = $this->getName();
+        
+        $button = new TButton($form_name.'_show_hide');
+        $button->{'class'} = 'btn btn-info btn-sm active';
+        $button->setLabel($label ?? AdiantiCoreTranslator::translate('Expand'));
+        $button->setImage($icon ?? 'fa:search');
+        $button->addFunction("\$('[name={$form_name}]').slideToggle('fast'); $(this).toggleClass( 'active' )");
+        $this->addHeaderWidget($button);
+        
+        if ($start_hidden)
+        {
+            $this->decorated->setProperty('style', 'display:none');
+        }
+        
+        return $button;
     }
     
     /**
@@ -294,6 +333,14 @@ class BootstrapFormBuilder implements AdiantiFormInterface
      */
     public function validate()
     {
+        if ($this->csrf_validation)
+        {
+    		if (!hash_equals($_POST['csrf_token'], TSession::getValue('csrf_token_'.$this->name.'_before')))
+    		{
+    			throw new Exception(AdiantiCoreTranslator::translate('CSRF Error'));
+    		}
+        }
+        
         return $this->decorated->validate();
     }
     
@@ -362,6 +409,8 @@ class BootstrapFormBuilder implements AdiantiFormInterface
                                 $this->decorated->addField($field);
                             }
                         }
+                        
+                        $content->setTagName('div');
                     }
                 }
             }
@@ -403,6 +452,7 @@ class BootstrapFormBuilder implements AdiantiFormInterface
                                 $this->addField($field);
                             }
                         }
+                        $slot->setTagName('div');
                     }
                 }
             }
@@ -499,6 +549,16 @@ class BootstrapFormBuilder implements AdiantiFormInterface
     }
     
     /**
+     * Add a form footer widget
+     * @param $widget Widget
+     */
+    public function addFooterWidget($widget)
+    {
+        $this->actions[] = $widget;
+        return $widget;
+    }
+    
+    /**
      * Add a form header action
      * @param $label Button label
      * @param $action Button action
@@ -580,6 +640,14 @@ class BootstrapFormBuilder implements AdiantiFormInterface
             return;
         }
         
+        if ($this->csrf_validation)
+        {
+    		$csrf_token = new THidden('csrf_token');
+    		$this->addFields([$csrf_token]);
+    		$csrf_token->setValue(TSession::getValue('csrf_token_'.$this->name));
+    		$this->decorated->silentField('csrf_token');
+        }
+        
         $this->decorated->{'class'} = 'form-horizontal';
         $this->decorated->{'type'}  = 'bootstrap';
         
@@ -598,7 +666,7 @@ class BootstrapFormBuilder implements AdiantiFormInterface
             }
         }
         
-        if (!empty($this->title))
+        if (!empty($this->title) || count($this->header_actions) > 0)
         {
             $heading = new TElement('div');
             $heading->{'class'} = 'card-header panel-heading';
@@ -850,7 +918,10 @@ class BootstrapFormBuilder implements AdiantiFormInterface
         {
             $this->render();
         }
-        $this->panel->show();
+        if (!$this->hidden)
+        {
+            $this->panel->show();
+        }
     }
     
     /**
@@ -860,7 +931,7 @@ class BootstrapFormBuilder implements AdiantiFormInterface
     {
         $object = $field; // BC Compability
         $field_size = (is_object($object) && method_exists($object, 'getSize')) ? $field->getSize() : null;
-        $has_underline = (!$field instanceof TLabel && !$field instanceof TRadioGroup && !$field instanceof TCheckGroup && !$field instanceof TButton && !$field instanceof THidden && !$field instanceof TSlider);
+        $has_underline = (!$field instanceof TLabel && !$field instanceof TRadioGroup && !$field instanceof TCheckGroup && !$field instanceof TButton && !$field instanceof THidden && !$field instanceof TSlider && !$field instanceof TCheckButton);
         $field_wrapper = new TElement('div');
         $field_wrapper->{'class'} = 'fb-inline-field-container ' . ((($field instanceof TField) and ($has_underline)) ? 'form-line' : '');
         $field_wrapper->{'style'} = "display: {$display};vertical-align:top;" . ($display=='inline-block'?'float:left':'');
@@ -877,7 +948,7 @@ class BootstrapFormBuilder implements AdiantiFormInterface
             }
         }
         
-        if ($field instanceof TField)
+        if ($field instanceof TField || $field instanceof TCheckList)
         {
             if (is_array($field_size))
             {
@@ -897,7 +968,7 @@ class BootstrapFormBuilder implements AdiantiFormInterface
                     }
                 }
             }
-            else if ($field_size && !$object instanceof TRadioGroup AND !$object instanceof TCheckGroup AND (!$object instanceof TSeekButton OR !empty($default_field_size)))
+            else if ($field_size && !$object instanceof TRadioGroup AND !$object instanceof TCheckGroup)
             {
                 $field_wrapper->{'style'} .= ( (strpos($field_size, '%') !== FALSE) ? ';width: '.$field_size : ';width: '.$field_size.'px');
             }
@@ -912,8 +983,17 @@ class BootstrapFormBuilder implements AdiantiFormInterface
         
         if ($field instanceof AdiantiWidgetInterface)
         {
-            $input_class = ($field instanceof TLabel)  ? '' : 'form-control';
-            $input_class = ($field instanceof TButton) ? 'btn btn-default btn-sm' : $input_class;
+            $input_class = 'form-control';
+            
+            if ($field instanceof TLabel || $field instanceof TCheckButton)
+            {
+                $input_class = '';
+            }
+            else if ($field instanceof TButton)
+            {
+                $input_class = empty($field->{'class'}) ? 'btn btn-default btn-sm' : '';
+            }
+            
             $field_class = $input_class . ' ' . ( isset($field->{'class'}) ? $field->{'class'} : '' );
             
             if (trim($field_class))
@@ -924,19 +1004,11 @@ class BootstrapFormBuilder implements AdiantiFormInterface
         
         if (is_object($object) && (method_exists($object, 'setSize')))
         {
-            if ($object instanceof TSeekButton)
-            {
-                $extra_size = $object->getExtraSize();
-                if (!$object->hasAuxiliar())
-                {
-                    $object->setSize("calc(100% - {$extra_size}px)");
-                }
-            }
-            else if (in_array($object->getProperty('widget'), ['tmultisearch', 'tdbmultisearch', 'thtmleditor', 'tmultientry']))
+            if (in_array($object->getProperty('widget'), ['tmultisearch', 'tdbmultisearch', 'thtmleditor', 'tmultientry']))
             {
                 $object->setSize('100%', $field_size[1] - 3);
             }
-            else if ( ($field_size) AND !($object instanceof TRadioGroup OR $object instanceof TCheckGroup))
+            else if ( ($field_size) AND !($object instanceof TRadioGroup || $object instanceof TCheckGroup))
             {
                 $object->setSize('100%', '100%');
             }

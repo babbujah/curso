@@ -15,7 +15,7 @@ use ReflectionClass;
 /**
  * Implements the Repository Pattern to deal with collections of Active Records
  *
- * @version    7.0
+ * @version    7.4
  * @package    database
  * @author     Pablo Dall'Oglio
  * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
@@ -24,21 +24,24 @@ use ReflectionClass;
 class TRepository
 {
     protected $class; // Active Record class to be manipulated
+    protected $trashed;
     protected $criteria; // buffered criteria to use with fluent interfaces
     protected $setValues;
     protected $columns;
+    protected $aggregates;
     
     /**
      * Class Constructor
      * @param $class = Active Record class name
      */
-    public function __construct($class)
+    public function __construct($class, $withTrashed = FALSE)
     {
         if (class_exists($class))
         {
             if (is_subclass_of($class, 'TRecord'))
             {
                 $this->class = $class;
+                $this->trashed = $withTrashed;
                 $this->criteria = new TCriteria;
             }
             else
@@ -50,8 +53,27 @@ class TRepository
         {
             throw new Exception(AdiantiCoreTranslator::translate('The class ^1 was not found. Check the class name or the file name. They must match', '"' . $class . '"'));
         }
+        
+        $this->aggregates = [];
     }
     
+    /**
+     * Set criteria
+     */
+    public function setCriteria(TCriteria $criteria)
+    {
+        $this->criteria = $criteria;
+    }
+
+    /**
+     * Set withTrashed using fluent interfaces
+     */
+    public function withTrashed()
+    {
+        $this->trashed = true;
+        return $this;
+    }
+
     /**
      * Returns the name of database entity
      * @return A String containing the name of the entity
@@ -200,7 +222,14 @@ class TRepository
         {
             $criteria = isset($this->criteria) ? $this->criteria : new TCriteria;
         }
+
+        $deletedat = $this->class::getDeletedAtColumn();
         
+        if (!$this->trashed && $deletedat)
+        {
+            $criteria->add(new TFilter($deletedat, 'IS', NULL));
+        }
+
         // creates a SELECT statement
         $sql = new TSqlSelect;
         $sql->addColumn($this->getAttributeList());
@@ -324,6 +353,14 @@ class TRepository
         {
             $criteria = isset($this->criteria) ? $this->criteria : new TCriteria;
         }
+
+        $deletedat = $this->class::getDeletedAtColumn();
+        
+        if (!$this->trashed && $deletedat)
+        {
+            $criteria->add(new TFilter($deletedat, 'IS', NULL));
+        }
+
         $setValues = isset($setValues) ? $setValues : $this->setValues;
         
         $class = $this->class;
@@ -420,6 +457,14 @@ class TRepository
         {
             $criteria = isset($this->criteria) ? $this->criteria : new TCriteria;
         }
+
+        $deletedat = $this->class::getDeletedAtColumn();
+        
+        if (!$this->trashed && $deletedat)
+        {
+            $criteria->add(new TFilter($deletedat, 'IS', NULL));
+        }
+        
         $class = $this->class;
         
         // get the connection of the active transaction
@@ -474,16 +519,38 @@ class TRepository
                 }
             }
             
-            // creates a DELETE statement
-            $sql = new TSqlDelete;
-            $sql->setEntity($this->getEntity());
+            if ($deletedat)
+            {
+                // creates a Update instruction
+                $sql = new TSqlUpdate;
+                $sql->setEntity($this->getEntity());
+
+                $info = TTransaction::getDatabaseInfo();
+                $date_mask = (in_array($info['type'], ['sqlsrv', 'dblib', 'mssql'])) ? 'Ymd H:i:s' : 'Y-m-d H:i:s';
+                $sql->setRowData($deletedat, date($date_mask));
+            }
+            else
+            {
+                // creates a DELETE statement
+                $sql = new TSqlDelete;
+                $sql->setEntity($this->getEntity());
+            }
+
             // assign the criteria to the DELETE statement
             $sql->setCriteria($criteria);
             
             if (isset($dbinfo['prep']) AND $dbinfo['prep'] == '1') // prepared ON
             {
                 $result = $conn-> prepare ( $sql->getInstruction( TRUE ) , array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
-                $result-> execute ( $criteria->getPreparedVars() );
+                
+                if ($sql instanceof TSqlUpdate)
+                {
+                    $result-> execute ($sql->getPreparedVars());
+                }
+                else
+                {
+                    $result-> execute ($criteria->getPreparedVars());
+                }
             }
             else
             {
@@ -514,6 +581,14 @@ class TRepository
         {
             $criteria = isset($this->criteria) ? $this->criteria : new TCriteria;
         }
+
+        $deletedat = $this->class::getDeletedAtColumn();
+        
+        if (!$this->trashed && $deletedat)
+        {
+            $criteria->add(new TFilter($deletedat, 'IS', NULL));
+        }
+
         // creates a SELECT statement
         $sql = new TSqlSelect;
         $sql->addColumn('count(*)');
@@ -566,6 +641,7 @@ class TRepository
     /**
      * Count aggregate
      * @param $column  Column to be aggregated
+     * @param $alias   Column alias
      * @return         An array of objects or the total value (if does not have group by)
      */
     public function countBy($column, $alias = null)
@@ -574,8 +650,21 @@ class TRepository
     }
     
     /**
+     * Count aggregate and do another aggregate after
+     * @param $column  Column to be aggregated
+     * @param $alias   Column alias
+     * @return         self object
+     */
+    public function countByAnd($column, $alias = null)
+    {
+        $this->aggregates[] = "count({$column}) as \"{$alias}\"";
+        return $this;
+    }
+    
+    /**
      * Sum aggregate
      * @param $column  Column to be aggregated
+     * @param $alias   Column alias
      * @return         An array of objects or the total value (if does not have group by)
      */
     public function sumBy($column, $alias = null)
@@ -584,8 +673,21 @@ class TRepository
     }
     
     /**
+     * Sum aggregate and do another aggregate after
+     * @param $column  Column to be aggregated
+     * @param $alias   Column alias
+     * @return         self object
+     */
+    public function sumByAnd($column, $alias = null)
+    {
+        $this->aggregates[] = "sum({$column}) as \"{$alias}\"";
+        return $this;
+    }
+    
+    /**
      * Average aggregate
      * @param $column  Column to be aggregated
+     * @param $alias   Column alias
      * @return         An array of objects or the total value (if does not have group by)
      */
     public function avgBy($column, $alias = null)
@@ -594,8 +696,21 @@ class TRepository
     }
     
     /**
+     * Average aggregate and do another aggregate after
+     * @param $column  Column to be aggregated
+     * @param $alias   Column alias
+     * @return         self object
+     */
+    public function avgByAnd($column, $alias = null)
+    {
+        $this->aggregates[] = "avg({$column}) as \"{$alias}\"";
+        return $this;
+    }
+    
+    /**
      * Min aggregate
      * @param $column  Column to be aggregated
+     * @param $alias   Column alias
      * @return         An array of objects or the total value (if does not have group by)
      */
     public function minBy($column, $alias = null)
@@ -604,13 +719,38 @@ class TRepository
     }
     
     /**
+     * Min aggregate and do another aggregate after
+     * @param $column  Column to be aggregated
+     * @param $alias   Column alias
+     * @return         self object
+     */
+    public function minByAnd($column, $alias = null)
+    {
+        $this->aggregates[] = "min({$column}) as \"{$alias}\"";
+        return $this;
+    }
+    
+    /**
      * Max aggregate
      * @param $column  Column to be aggregated
+     * @param $alias   Column alias
      * @return         An array of objects or the total value (if does not have group by)
      */
     public function maxBy($column, $alias = null)
     {
         return $this->aggregate('max', $column, $alias);
+    }
+    
+    /**
+     * Max aggregate and do another aggregate after
+     * @param $column  Column to be aggregated
+     * @param $alias   Column alias
+     * @return         self object
+     */
+    public function maxByAnd($column, $alias = null)
+    {
+        $this->aggregates[] = "max({$column}) as \"{$alias}\"";
+        return $this;
     }
     
     /**
@@ -628,6 +768,15 @@ class TRepository
         {
             $sql->addColumn( $this->criteria->getProperty('group') );
         }
+        
+        if ($this->aggregates)
+        {
+            foreach ($this->aggregates as $aggregate)
+            {
+                $sql->addColumn($aggregate);
+            }
+        }
+        
         $sql->addColumn("$function({$column}) as \"{$alias}\"");
         
         $sql->setEntity($this->getEntity());
@@ -706,6 +855,21 @@ class TRepository
     }
     
     /**
+     * Returns the last collection item
+     */
+    public function last($callObjectLoad = TRUE)
+    {
+        $class = $this->class;
+        $pk = (new $class)->getPrimaryKey();
+        
+        $collection = $this->orderBy($pk,'desc')->take(1)->load(null, $callObjectLoad);
+        if (isset($collection[0]))
+        {
+            return $collection[0];
+        }
+    }
+    
+    /**
      * Returns transformed collection
      */
     public function transform( Callable $callback, $callObjectLoad = TRUE)
@@ -743,5 +907,26 @@ class TRepository
         }
         
         return $newcollection;
+    }
+    
+    /**
+     * Dump Criteria
+     */
+	public function dump($prepared = FALSE)
+    {
+        if (isset($this->criteria) AND $this->criteria)
+        {
+            $criteria = clone $this->criteria;
+            $deletedat = $this->class::getDeletedAtColumn();
+            
+            if (!$this->trashed && $deletedat)
+            {
+                $criteria->add(new TFilter($deletedat, 'IS', NULL));
+            }
+
+            return $criteria->dump($prepared);
+        }
+
+        return NULL;
     }
 }

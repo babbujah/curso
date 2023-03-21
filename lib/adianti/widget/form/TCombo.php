@@ -12,7 +12,7 @@ use Exception;
 /**
  * ComboBox Widget
  *
- * @version    7.0
+ * @version    7.4
  * @package    widget
  * @subpackage form
  * @author     Pablo Dall'Oglio
@@ -358,7 +358,7 @@ class TCombo extends TField implements AdiantiWidgetInterface
         
         if (!empty($this->size))
         {
-            if (strstr($this->size, '%') !== FALSE)
+            if (strstr((string) $this->size, '%') !== FALSE)
             {
                 $this->setProperty('style', "width:{$this->size};", false); //aggregate style info
             }
@@ -393,7 +393,7 @@ class TCombo extends TField implements AdiantiWidgetInterface
             $this->tag->{'onclick'}  = "return false;";
             $this->tag->{'style'}   .= ';pointer-events:none';
             $this->tag->{'tabindex'} = '-1';
-            $this->tag->{'class'}    = 'tcombo_disabled'; // CSS
+            $this->tag->{'class'}    = 'tcombo tcombo_disabled'; // CSS
         }
         
         if ($this->searchable)
@@ -412,7 +412,7 @@ class TCombo extends TField implements AdiantiWidgetInterface
             
             if (!parent::getEditable())
             {
-                TScript::create(" tmultisearch_disable_field( '{$this->formName}', '{$this->name}'); ");
+                TScript::create(" tmultisearch_disable_field( '{$this->formName}', '{$this->name}', '{$this->tag->{'title'}}'); ");
             }
         }
     }

@@ -240,6 +240,14 @@
                 <icon>fa:circle fa-fw</icon>
                 <action>FormularioBootstrapEstatico</action>
             </menuitem>
+            <menuitem label='Formulário Bootstrap Lista de campos'>
+                <icon>fa:circle fa-fw</icon>
+                <action>BootstrapFieldList</action>
+            </menuitem>
+            <menuitem label='Formulário Bootstrap Lista de campos com eventos'>
+                <icon>fa:circle fa-fw</icon>
+                <action>FormFieldListEventView</action>
+            </menuitem>
         </menu>
     </menuitem>
 </menu>

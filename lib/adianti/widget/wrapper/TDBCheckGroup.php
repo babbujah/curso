@@ -1,10 +1,7 @@
 <?php
 namespace Adianti\Widget\Wrapper;
 
-use Adianti\Core\AdiantiCoreTranslator;
 use Adianti\Widget\Form\TCheckGroup;
-use Adianti\Database\TTransaction;
-use Adianti\Database\TRepository;
 use Adianti\Database\TCriteria;
 
 use Exception;
@@ -12,7 +9,7 @@ use Exception;
 /**
  * Database CheckBox Widget
  *
- * @version    7.0
+ * @version    7.4
  * @package    widget
  * @subpackage wrapper
  * @author     Pablo Dall'Oglio
@@ -22,6 +19,8 @@ use Exception;
 class TDBCheckGroup extends TCheckGroup
 {
     protected $items; // array containing the combobox options
+    
+    use AdiantiDatabaseWidgetTrait;
     
     /**
      * Class Constructor
@@ -38,64 +37,28 @@ class TDBCheckGroup extends TCheckGroup
         // executes the parent class constructor
         parent::__construct($name);
         
-        $key   = trim($key);
-        $value = trim($value);
-        
-        if (empty($database))
-        {
-            throw new Exception(AdiantiCoreTranslator::translate('The parameter (^1) of ^2 is required', 'database', __CLASS__));
-        }
-        
-        if (empty($model))
-        {
-            throw new Exception(AdiantiCoreTranslator::translate('The parameter (^1) of ^2 is required', 'model', __CLASS__));
-        }
-        
-        if (empty($key))
-        {
-            throw new Exception(AdiantiCoreTranslator::translate('The parameter (^1) of ^2 is required', 'key', __CLASS__));
-        }
-        
-        if (empty($value))
-        {
-            throw new Exception(AdiantiCoreTranslator::translate('The parameter (^1) of ^2 is required', 'value', __CLASS__));
-        }
-        
-        TTransaction::open($database);
-        
-        // creates repository
-        $repository = new TRepository($model);
-        if (is_null($criteria))
-        {
-            $criteria = new TCriteria;
-        }
-        $criteria->setProperty('order', isset($ordercolumn) ? $ordercolumn : $key);
-        
-        // load all objects
-        $collection = $repository->load($criteria, FALSE);
-        
-        // add objects to the options
-        if ($collection)
-        {
-            $items = array();
-            foreach ($collection as $object)
-            {
-                if (isset($object->$value))
-                {
-                    $items[$object->$key] = $object->$value;
-                }
-                else
-                {
-                    $items[$object->$key] = $object->render($value);
-                }
-            }
-            
-            if (strpos($value, '{') !== FALSE AND is_null($ordercolumn))
-            {
-                asort($items);
-            }
-            parent::addItems($items);
-        }
-        TTransaction::close();
+        // load items
+        parent::addItems( self::getItemsFromModel($database, $model, $key, $value, $ordercolumn, $criteria) );
+    }
+
+    /**
+     * Reload checkbox from model data
+     * @param  $formname    form name
+     * @param  $field       field name
+     * @param  $database    database name
+     * @param  $model       model class name
+     * @param  $key         table field to be used as key in the checkbox
+     * @param  $value       table field to be listed in the checkbox
+     * @param  $ordercolumn column to order the fields (optional)
+     * @param  $criteria    criteria (TCriteria object) to filter the model (optional)
+     * @param  $options     array of options [layout, breakItems, useButton, value, valueSeparator, changeAction, changeFunction]
+     */
+    public static function reloadFromModel($formname, $field, $database, $model, $key, $value, $ordercolumn = NULL, $criteria = NULL, $options = [])
+    {
+        // load items
+        $items = self::getItemsFromModel($database, $model, $key, $value, $ordercolumn, $criteria);
+
+        // reload checkbox
+        parent::reload($formname, $field, $items, $options);
     }
 }

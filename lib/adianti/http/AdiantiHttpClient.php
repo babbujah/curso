@@ -1,13 +1,14 @@
 <?php
 namespace Adianti\Http;
 
+use Adianti\Core\AdiantiCoreApplication;
 use Adianti\Core\AdiantiCoreTranslator;
 use Exception;
 
 /**
  * Basic HTTP Client request
  *
- * @version    7.0
+ * @version    7.4
  * @package    core
  * @author     Pablo Dall'Oglio
  * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
@@ -26,20 +27,20 @@ class AdiantiHttpClient
     {
         $ch = curl_init();
         
-        if ($method == 'POST' OR $method == 'PUT')
+        if ($method == 'POST' || $method == 'PUT')
         {
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
             curl_setopt($ch, CURLOPT_POST, true);
      
         }
-        else if ($method == 'GET' OR $method == 'DELETE')
+        else if ( ($method == 'GET' || $method == 'DELETE') && $params)
         {
             $url .= '?'.http_build_query($params);
         }
        
         $defaults = array(
             CURLOPT_URL => $url,
-            CURLOPT_HEADER => true,
+            CURLOPT_HEADER => false,
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_SSL_VERIFYHOST => false,
@@ -66,7 +67,7 @@ class AdiantiHttpClient
         
         if (json_last_error() !== JSON_ERROR_NONE)
         {
-            throw new Exception(AdiantiCoreTranslator::translate('Return is not a valid JSON. Check the URL'));
+            throw new Exception(AdiantiCoreTranslator::translate('Return is not a valid JSON. Check the URL') . ' ' . ( AdiantiCoreApplication::getDebugMode() ? $output : '') );
         }
         
         if (!empty($return['status']) && $return['status'] == 'error') {
@@ -80,6 +81,12 @@ class AdiantiHttpClient
         if (!empty($return['errors'])) {
             throw new Exception($return['errors']['message']);
         }
-        return $return['data'];
+        
+        if (!empty($return['data']))
+        {
+            return $return['data'];
+        }
+        
+        return $return;
     }
 }

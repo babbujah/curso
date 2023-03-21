@@ -30,7 +30,7 @@ use StdClass;
 /**
  * Standard Page controller for Seek buttons
  *
- * @version    7.0
+ * @version    7.4
  * @package    base
  * @author     Pablo Dall'Oglio
  * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
@@ -80,7 +80,7 @@ class TStandardSeek extends TWindow
         $find_button->setImage('fa:search blue');
         
         // add a row for the filter field
-        $table->addRowSet( new TLabel(_t('Search').': '), $display_field, $find_button);
+        $table->addRowSet( new TLabel(AdiantiCoreTranslator::translate('Search').': '), $display_field, $find_button);
         
         // define wich are the form fields
         $this->form->setFields(array($display_field, $find_button));
@@ -302,7 +302,7 @@ class TStandardSeek extends TWindow
             TSession::setValue('tstandardseek_filter', NULL);
             TSession::setValue('tstandardseek_display_value', NULL);
             TSession::setValue('standard_seek_receive_key',   $param['receive_key']);
-            TSession::setValue('standard_seek_receive_field', $param['receive_field']);
+            TSession::setValue('standard_seek_receive_field', $param['receive_field'] ?? null);
             TSession::setValue('standard_seek_display_field', $param['display_field']);
             TSession::setValue('standard_seek_model',         $param['model']);
             TSession::setValue('standard_seek_database',      $param['database']);

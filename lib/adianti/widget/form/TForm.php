@@ -15,7 +15,7 @@ use ReflectionClass;
 /**
  * Wrapper class to deal with forms
  *
- * @version    7.0
+ * @version    7.4
  * @package    widget
  * @subpackage form
  * @author     Pablo Dall'Oglio
@@ -29,7 +29,8 @@ class TForm implements AdiantiFormInterface
     protected $children;
     protected $js_function;
     protected $element;
-    static private $forms;
+    protected $silent_fields;
+    private static $forms;
     
     /**
      * Class Constructor
@@ -41,8 +42,17 @@ class TForm implements AdiantiFormInterface
         {
             $this->setName($name);
         }
-        $this->children = array();
+        $this->children = [];
+        $this->silent_fields = [];
         $this->element  = new TElement('form');
+    }
+    
+    /**
+     * Change tag name
+     */
+    public function setTagName($name)
+    {
+        $this->element->setName($name);
     }
     
     /**
@@ -68,6 +78,14 @@ class TForm implements AdiantiFormInterface
         {
             $this->$name = $value;
         }
+    }
+    
+    /**
+     * Silent field
+     */
+    public function silentField($name)
+    {
+        $this->silent_fields[] = $name;
     }
     
     /**
@@ -151,10 +169,10 @@ class TForm implements AdiantiFormInterface
             {
                 if (is_array($value))
                 {
-                    $value = implode('|', $value);
+                    $value = json_encode($value);
                 }
                 
-                $value = addslashes($value);
+                $value = addslashes((string) $value);
                 $value = AdiantiStringConversion::assureUnicode($value);
                 
                 $value = str_replace(array("\n", "\r"), array( '\n', '\r'), $value );
@@ -307,6 +325,8 @@ class TForm implements AdiantiFormInterface
         // iterate the form fields
         foreach ($this->fields as $name => $field)
         {
+            $name = str_replace(['[',']'], ['',''], $name);
+            
             if ($name) // labels don't have name
             {
                 if (isset($object->$name))
@@ -333,7 +353,7 @@ class TForm implements AdiantiFormInterface
         {
             $key = str_replace(['[',']'], ['',''], $key);
             
-            if (!$fieldObject instanceof TButton)
+            if (!$fieldObject instanceof TButton && !in_array($key, $this->silent_fields))
             {
                 $object->$key = $fieldObject->getPostData();
             }

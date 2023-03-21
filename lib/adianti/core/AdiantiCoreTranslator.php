@@ -4,7 +4,7 @@ namespace Adianti\Core;
 /**
  * Framework translation class for internal messages
  *
- * @version    7.0
+ * @version    7.4
  * @package    core
  * @author     Pablo Dall'Oglio
  * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
@@ -131,6 +131,29 @@ class AdiantiCoreTranslator
         $this->messages['en'][] = 'The parameter (^1) of ^2 must not be empty';
         $this->messages['en'][] = 'Return is not a valid JSON. Check the URL';
         $this->messages['en'][] = 'Required fields';
+        $this->messages['en'][] = 'CSRF Error';
+        $this->messages['en'][] = 'Add';
+        $this->messages['en'][] = 'Expand';
+        $this->messages['en'][] = 'Server has received no file';
+        $this->messages['en'][] = 'Check the server limits';
+        $this->messages['en'][] = 'The current limit is';
+        $this->messages['en'][] = 'Reset';
+        $this->messages['en'][] = 'Scale horizontal';
+        $this->messages['en'][] = 'Scale vertical';
+        $this->messages['en'][] = 'Move';
+        $this->messages['en'][] = 'Crop';
+        $this->messages['en'][] = 'Zoom in';
+        $this->messages['en'][] = 'Zoom out';
+        $this->messages['en'][] = 'Rotate right';
+        $this->messages['en'][] = 'Rotate left';
+        $this->messages['en'][] = 'Sunday';
+        $this->messages['en'][] = 'Monday';
+        $this->messages['en'][] = 'Tuesday';
+        $this->messages['en'][] = 'Wednesday';
+        $this->messages['en'][] = 'Thursday';
+        $this->messages['en'][] = 'Friday';
+        $this->messages['en'][] = 'Saturday';
+        $this->messages['en'][] = 'Softdelete is not active';
         
         $this->messages['pt'][] = 'Carregando';
         $this->messages['pt'][] = 'Arquivo não encontrado';
@@ -184,7 +207,7 @@ class AdiantiCoreTranslator
         $this->messages['pt'][] = 'Sem transação ativa com a base de dados';
         $this->messages['pt'][] = 'Objeto não encontrado';
         $this->messages['pt'][] = 'Objeto ^1 não encontrado em ^2';
-        $this->messages['pt'][] = 'Método ^1 não aceita valores NULOS';
+        $this->messages['pt'][] = 'Mtodo ^1 não aceita valores NULOS';
         $this->messages['pt'][] = 'Método ^1 deve receber um parâmetro do tipo ^2';
         $this->messages['pt'][] = 'Estilo ^1 não encontrado em ^2';
         $this->messages['pt'][] = 'Você deve executar o construtor de ^1';
@@ -242,7 +265,30 @@ class AdiantiCoreTranslator
         $this->messages['pt'][] = 'O parâmetro (^1) de ^2 não deve ser vazio';
         $this->messages['pt'][] = 'Retorno não é JSON válido. Verifique a URL';
         $this->messages['pt'][] = 'Campos obrigatórios';
-		
+        $this->messages['pt'][] = 'Erro de CSRF';
+        $this->messages['pt'][] = 'Adicionar';
+        $this->messages['pt'][] = 'Expandir';
+        $this->messages['pt'][] = 'O servidor não recebeu o arquivo';
+        $this->messages['pt'][] = 'Verifique os limites do servidor';
+        $this->messages['pt'][] = 'O limite atual é';
+        $this->messages['pt'][] = 'Reverter';
+        $this->messages['pt'][] = 'Escala horizontal';
+        $this->messages['pt'][] = 'Escala vertical';
+        $this->messages['pt'][] = 'Mover';
+        $this->messages['pt'][] = 'Cortar';
+        $this->messages['pt'][] = 'Aumentar zoom';
+        $this->messages['pt'][] = 'Diminuir zoom';
+        $this->messages['pt'][] = 'Rotacionar para a direita';
+        $this->messages['pt'][] = 'Rotacionar para a esquerda';
+        $this->messages['pt'][] = 'Domingo';
+        $this->messages['pt'][] = 'Segunda';
+        $this->messages['pt'][] = 'Terça';
+        $this->messages['pt'][] = 'Quarta';
+        $this->messages['pt'][] = 'Quinta';
+        $this->messages['pt'][] = 'Sexta';
+        $this->messages['pt'][] = 'Sábado';
+        $this->messages['pt'][] = 'Softdelete não está ativo';
+        
         $this->messages['es'][] = 'Cargando';
         $this->messages['es'][] = 'Archivo no encontrado';
         $this->messages['es'][] = 'Buscar';
@@ -307,7 +353,7 @@ class AdiantiCoreTranslator
         $this->messages['es'][] = 'Cerrar la aplicación ?';
         $this->messages['es'][] = 'Utilize addField() o setFields() para definir los campos del formulário';
         $this->messages['es'][] = 'Verifique si la acción (^1) existe';
-        $this->messages['es'][] = 'Información';
+        $this->messages['es'][] = 'Informacin';
         $this->messages['es'][] = 'Error';
         $this->messages['es'][] = 'Excepción';
         $this->messages['es'][] = 'Pregunta';
@@ -353,6 +399,29 @@ class AdiantiCoreTranslator
         $this->messages['es'][] = 'El parametro (^1) de ^2 no puede estar vacío';
         $this->messages['es'][] = 'El retorno no es un JSON válido. Verifique la URL';
         $this->messages['es'][] = 'Campos requeridos';
+        $this->messages['es'][] = 'Error de CSRF';
+        $this->messages['es'][] = 'Agregar';
+        $this->messages['es'][] = 'Expandir';
+        $this->messages['es'][] = 'El servidor no ha recibido ningún archivo';
+        $this->messages['es'][] = 'Verifique os limites do servidor';
+        $this->messages['es'][] = 'El límite actual es';
+        $this->messages['es'][] = 'Retroceder';
+        $this->messages['es'][] = 'Escala horizontal';
+        $this->messages['es'][] = 'Escala vertical';
+        $this->messages['es'][] = 'Moverse';
+        $this->messages['es'][] = 'Cortar';
+        $this->messages['es'][] = 'Acercars';
+        $this->messages['es'][] = 'Alejar';
+        $this->messages['es'][] = 'Girar a la derecha';
+        $this->messages['es'][] = 'Girar a la izquierda';
+        $this->messages['es'][] = 'Domingo';
+        $this->messages['es'][] = 'Lunes';
+        $this->messages['es'][] = 'Martes';
+        $this->messages['es'][] = 'Miércoles';
+        $this->messages['es'][] = 'Jueves';
+        $this->messages['es'][] = 'Viernes';
+        $this->messages['es'][] = 'Sábado';
+        $this->messages['es'][] = 'Softdelete no esta activo';
     }
     
     /**

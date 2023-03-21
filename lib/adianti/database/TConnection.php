@@ -8,7 +8,7 @@ use Exception;
 /**
  * Singleton manager for database connections
  *
- * @version    7.0
+ * @version    7.4
  * @package    database
  * @author     Pablo Dall'Oglio
  * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
@@ -75,6 +75,7 @@ class TConnection
         $char  = isset($db['char']) ? $db['char'] : NULL;
         $flow  = isset($db['flow']) ? $db['flow'] : NULL;
         $fkey  = isset($db['fkey']) ? $db['fkey'] : NULL;
+        $zone  = isset($db['zone']) ? $db['zone'] : NULL;
         $type  = strtolower($type);
         
         // each database driver has a different instantiation process
@@ -92,11 +93,24 @@ class TConnection
                 $port = $port ? $port : '3306';
                 if ($char == 'ISO')
                 {
-                    $conn = new PDO("mysql:host={$host};port={$port};dbname={$name}", $user, $pass);
+                    $options = array();
+
+                    if ($zone)
+                    {
+                        $options = array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET time_zone = '{$zone}'");
+                    }
+
+                    $conn = new PDO("mysql:host={$host};port={$port};dbname={$name}", $user, $pass, $options);
+                }
+                elseif ($char == 'utf8mb4')
+                {
+                    $zone = $zone ? ";SET time_zone = '{$zone}'" : "";
+                    $conn = new PDO("mysql:host={$host};port={$port};dbname={$name}", $user, $pass, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4{$zone}"));
                 }
                 else
                 {
-                    $conn = new PDO("mysql:host={$host};port={$port};dbname={$name}", $user, $pass, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
+                    $zone = $zone ? ";SET time_zone = '{$zone}'" : "";
+                    $conn = new PDO("mysql:host={$host};port={$port};dbname={$name}", $user, $pass, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8{$zone}"));
                 }
                 break;
             case 'sqlite':
@@ -111,6 +125,7 @@ class TConnection
                 $db_string = empty($port) ? "{$host}:{$name}" : "{$host}/{$port}:{$name}";
                 $charset = $char ? ";charset={$char}" : '';
                 $conn = new PDO("firebird:dbname={$db_string}{$charset}", $user, $pass);
+                $conn->setAttribute( PDO::ATTR_AUTOCOMMIT, 0);
                 break;
             case 'oracle':
                 $port    = $port ? $port : '1521';
@@ -156,24 +171,28 @@ class TConnection
                 }
                 else
                 {
+                    $charset = $char ? ";charset={$char}" : '';
+                    
                     if ($port)
                     {
-                        $conn = new PDO("dblib:host={$host}:{$port};dbname={$name}", $user, $pass);
+                        $conn = new PDO("dblib:host={$host}:{$port};dbname={$name}{$charset}", $user, $pass);
                     }
                     else
                     {
-                        $conn = new PDO("dblib:host={$host};dbname={$name}", $user, $pass);
+                        $conn = new PDO("dblib:host={$host};dbname={$name}{$charset}", $user, $pass);
                     }
                 }
                 break;
             case 'dblib':
+                $charset = $char ? ";charset={$char}" : '';
+                
                 if ($port)
                 {
-                    $conn = new PDO("dblib:host={$host}:{$port};dbname={$name}", $user, $pass);
+                    $conn = new PDO("dblib:host={$host}:{$port};dbname={$name}{$charset}", $user, $pass);
                 }
                 else
                 {
-                    $conn = new PDO("dblib:host={$host};dbname={$name}", $user, $pass);
+                    $conn = new PDO("dblib:host={$host};dbname={$name}{$charset}", $user, $pass);
                 }
                 break;
             case 'sqlsrv':
@@ -184,6 +203,10 @@ class TConnection
                 else
                 {
                     $conn = new PDO("sqlsrv:Server={$host};Database={$name}", $user, $pass);
+                }
+                if (!empty($db['ntyp']))
+                {
+                    $conn->setAttribute(PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE, true);
                 }
                 break;
             default:

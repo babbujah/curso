@@ -6,7 +6,7 @@ use Adianti\Widget\Base\TElement;
 /**
  * Base class for scripts
  *
- * @version    7.0
+ * @version    7.4
  * @package    widget
  * @subpackage base
  * @author     Pablo Dall'Oglio
@@ -42,8 +42,8 @@ class TScript
      * Import script
      * @param $script Script file name
      */
-    public static function importFromFile( $script )
+    public static function importFromFile( $script, $show = TRUE, $timeout = null )
     {
-        TScript::create('$.getScript("'.$script.'");');
+        TScript::create('$.getScript("'.$script.'");', $show, $timeout);
     }
 }

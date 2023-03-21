@@ -3,11 +3,14 @@ namespace Adianti\Control;
 
 use Adianti\Control\TAction;
 use Adianti\Widget\Container\TJQueryDialog;
+use Adianti\Widget\Base\TScript;
+
+use ReflectionClass;
 
 /**
  * Window Container (JQueryDialog wrapper)
  *
- * @version    7.0
+ * @version    7.4
  * @package    control
  * @author     Pablo Dall'Oglio
  * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
@@ -20,12 +23,18 @@ class TWindow extends TPage
     public function __construct()
     {
         parent::__construct();
+        
         $this->wrapper = new TJQueryDialog;
         $this->wrapper->setUseOKButton(FALSE);
         $this->wrapper->setTitle('');
         $this->wrapper->setSize(1000, 500);
         $this->wrapper->setModal(TRUE);
         $this->wrapper->{'widget'} = 'T'.'Window';
+        $this->wrapper->{'name'} = $this->getClassName();
+        
+        $this->{'id'} = 'window_' . mt_rand(1000000000, 1999999999);
+        $this->{'window_name'} = $this->wrapper->{'name'};
+        $this->{'role'} = 'window-wrapper';
         parent::add($this->wrapper);
     }
     
@@ -177,6 +186,22 @@ class TWindow extends TPage
     }
     
     /**
+     * Block UI
+     */
+    public static function blockUI($timeout = null)
+    {
+        TScript::create('tjquerydialog_block_ui()', true, $timeout);
+    }
+    
+    /**
+     * Unblock UI
+     */
+    public static function unBlockUI($timeout = null)
+    {
+        TScript::create('tjquerydialog_unblock_ui()', true, $timeout);
+    }
+    
+    /**
      * Close TJQueryDialog's
      */
     public static function closeWindow($id = null)
@@ -187,7 +212,15 @@ class TWindow extends TPage
         }
         else
         {
-            TJQueryDialog::closeAll();
+            TJQueryDialog::closeLatest();
         }
+    }
+    
+    /**
+     * Close window by name of controller
+     */
+    public static function closeWindowByName($name)
+    {
+        TScript::create( ' $(\'[window_name="'.$name.'"]\').remove(); ' );
     }
 }

@@ -1,18 +1,21 @@
 <?php
 namespace Adianti\Database;
 
+use Adianti\Core\AdiantiCoreTranslator;
 use Adianti\Database\TConnection;
 use Adianti\Log\TLogger;
 use Adianti\Log\TLoggerSTD;
 use Adianti\Log\TLoggerTXT;
 use Adianti\Log\AdiantiLoggerInterface;
+
 use PDO;
 use Closure;
+use Exception;
 
 /**
  * Manage Database transactions
  *
- * @version    7.0
+ * @version    7.4
  * @package    database
  * @author     Pablo Dall'Oglio
  * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
@@ -56,15 +59,19 @@ class TTransaction
         }
         else
         {
+            $dbinfo = TConnection::getDatabaseInfo($database);
             self::$conn[self::$counter]   = TConnection::open($database);
-            self::$dbinfo[self::$counter] = TConnection::getDatabaseInfo($database);
+            self::$dbinfo[self::$counter] = $dbinfo;
         }
         
         self::$database[self::$counter] = $database;
         self::$uniqid[self::$counter] = uniqid();
         
         $driver = self::$conn[self::$counter]->getAttribute(PDO::ATTR_DRIVER_NAME);
-        if ($driver !== 'dblib')
+        
+        $fake = isset($dbinfo['fake']) ? $dbinfo['fake'] : FALSE;
+        
+        if (!$fake)
         {
             // begins transaction
             self::$conn[self::$counter]->beginTransaction();
@@ -88,6 +95,18 @@ class TTransaction
     }
     
     /**
+     * Open fake transaction
+     * @param $database Name of the database (an INI file).
+     */
+    public static function openFake($database)
+    {
+        $info = TConnection::getDatabaseInfo($database);
+        $info['fake'] = 1;
+        
+        TTransaction::open(null, $info);
+    }
+    
+    /**
      * Returns the current active connection
      * @return PDO
      */
@@ -107,11 +126,8 @@ class TTransaction
         if (isset(self::$conn[self::$counter]))
         {
             $driver = self::$conn[self::$counter]->getAttribute(PDO::ATTR_DRIVER_NAME);
-            if ($driver !== 'dblib')
-            {
-                // rollback
-                self::$conn[self::$counter]->rollBack();
-            }
+            // rollback
+            self::$conn[self::$counter]->rollBack();
             self::$conn[self::$counter] = NULL;
             self::$uniqid[self::$counter] = NULL;
             self::$counter --;
@@ -131,11 +147,12 @@ class TTransaction
             $info = self::getDatabaseInfo();
             $fake = isset($info['fake']) ? $info['fake'] : FALSE;
             
-            if ($driver !== 'dblib' AND !$fake)
+            if (!$fake)
             {
                 // apply the pending operations
                 self::$conn[self::$counter]->commit();
             }
+            
             self::$conn[self::$counter] = NULL;
             self::$uniqid[self::$counter] = NULL;
             self::$counter --;

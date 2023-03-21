@@ -10,7 +10,7 @@ use Exception;
 /**
  * Toast
  *
- * @version    7.0
+ * @version    7.4
  * @package    widget
  * @subpackage dialog
  * @author     Pablo Dall'Oglio
