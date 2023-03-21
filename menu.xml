@@ -248,6 +248,18 @@
                 <icon>fa:circle fa-fw</icon>
                 <action>FormFieldListEventView</action>
             </menuitem>
+            <menuitem label='Formulário Bootstrap com Checklist'>
+                <icon>fa:circle fa-fw</icon>
+                <action>FormularioCheckList</action>
+            </menuitem>
+            <menuitem label='Formulário Bootstrap com Máscaras'>
+                <icon>fa:circle fa-fw</icon>
+                <action>FormularioMascaras</action>
+            </menuitem>
+            <menuitem label='Formulário Bootstrap com Validações'>
+                <icon>fa:circle fa-fw</icon>
+                <action>FormularioValidacoes</action>
+            </menuitem>
         </menu>
     </menuitem>
 </menu>
