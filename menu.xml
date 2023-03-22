@@ -260,6 +260,34 @@
                 <icon>fa:circle fa-fw</icon>
                 <action>FormularioValidacoes</action>
             </menuitem>
+            <menuitem label='Formulário Bootstrap Elementos de Seleção'>
+                <icon>fa:circle fa-fw</icon>
+                <action>FormularioSelecoes</action>
+            </menuitem>
+            <menuitem label='Formulário Bootstrap Elementos de Seleção Banco de dados'>
+                <icon>fa:circle fa-fw</icon>
+                <action>FormularioSelecoesBanco</action>
+            </menuitem>
+            <menuitem label='Formulário Bootstrap Elementos Interações'>
+                <icon>fa:circle fa-fw</icon>
+                <action>FormularioInteracoes</action>
+            </menuitem>
+            <menuitem label='Formulário Bootstrap Listas de ordenação'>
+                <icon>fa:circle fa-fw</icon>
+                <action>SortList</action>
+            </menuitem>
+            <menuitem label='Formulário Bootstrap Editor HTML'>
+                <icon>fa:circle fa-fw</icon>
+                <action>HtmlEditor</action>
+            </menuitem>
+            <menuitem label='Formulário Bootstrap Barcode e QRCode'>
+                <icon>fa:circle fa-fw</icon>
+                <action>FormCodeReader</action>
+            </menuitem>
+            <menuitem label='Formulário Bootstrap Barcode e QRCode ORIGINAL'>
+                <icon>fa:circle fa-fw</icon>
+                <action>FormCodeReaderOriginal</action>
+            </menuitem>
         </menu>
     </menuitem>
 </menu>
