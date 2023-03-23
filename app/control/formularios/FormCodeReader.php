@@ -6,6 +6,7 @@ class FormCodeReader extends TPage{
     public function __construct(){
         parent::__construct();
         
+        try{
         $this->form = new BootstrapFormBuilder;
         $this->form->setFormTitle('Leitura de barcode e qrcode');
         
@@ -20,6 +21,9 @@ class FormCodeReader extends TPage{
         
         
         parent::add($this->form);
+        }catch(Exception $e){
+        
+        }
     }
     
 }

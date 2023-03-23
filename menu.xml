@@ -280,13 +280,21 @@
                 <icon>fa:circle fa-fw</icon>
                 <action>HtmlEditor</action>
             </menuitem>
-            <menuitem label='Formulário Bootstrap Barcode e QRCode'>
+            <menuitem label='Formulário Bootstrap Barcode e QRCode CONSERTAR'>
                 <icon>fa:circle fa-fw</icon>
                 <action>FormCodeReader</action>
             </menuitem>
-            <menuitem label='Formulário Bootstrap Barcode e QRCode ORIGINAL'>
+            <menuitem label='Formulário Bootstrap Barcode e QRCode ORIGINAL CONSERTAR'>
                 <icon>fa:circle fa-fw</icon>
                 <action>FormCodeReaderOriginal</action>
+            </menuitem>
+            <menuitem label='Captura de imagem CONSERTAR'>
+                <icon>fa:circle fa-fw</icon>
+                <action>FormImageUploaderOLD</action>
+            </menuitem>
+            <menuitem label='Captura de imagem'>
+                <icon>fa:circle fa-fw</icon>
+                <action>FormImageUploader</action>
             </menuitem>
         </menu>
     </menuitem>
