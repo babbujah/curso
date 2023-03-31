@@ -10,7 +10,9 @@ class UrlDecorator implements IEncurtadorLink{
         return $this->encurtadorLink->encurtarLink();
     }
     
+    /*
     public function cifrar(){
         return $this->encurtadorLink->cifrar();
     }
+    */
 }

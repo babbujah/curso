@@ -8,6 +8,7 @@ class TesteUrl extends TPage{
         $encurtador = new Encurtador();
         $encutadorHash = new EncurtadorHashBasicoServiceDecorator($encurtador);
         
+        //print_r($encurtador->encurtarLink());
         print_r($encutadorHash->encurtarLink());
     }
 }

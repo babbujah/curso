@@ -1,5 +1,5 @@
 <?php
 interface IEncurtadorLink{
     public function encurtarLink();
-    public function cifrar();
+    //public function cifrar($urlRelativa);
 }

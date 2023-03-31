@@ -5,20 +5,18 @@ class Encurtador implements IEncurtadorLink{
     //private $enderecoAbsoluto;
     private $enderecoRelativoReal;
     //private $enderecoRelativoPersonalizado;
-    //private $enderecoRelativoEncurtado;
+    private $enderecoRelativoEncurtado;
     public function __construct(){
         //$this->enderecoAbsoluto = SELF::DOMINIO;
-        $this->enderecoRelativoReal
+        $this->enderecoRelativoReal = SELF::DOMINIO;
         //$this->enderecoRelativoPersonalizado = "";
-        //$this->enderecoRelativoEncurtado = "";
+        $this->enderecoRelativoEncurtado = SELF::DOMINIO;
     }
     
     public function encurtarLink(){
-        return "";   
+        return SELF::DOMINIO;   
     }
-    public function cifrar(){
-        return "";
-    }
+    
     
     /*
     private recuperarEnderecoRelativo(){
@@ -41,5 +39,9 @@ class Encurtador implements IEncurtadorLink{
     
     public function get_enderecoRelativoEncurtado(){
         return $this->enderecoRelativoEncurtado;
+    }
+    
+    public function set_enderecoRelativoEncurtado($enderecoRelativoCifrado){
+        $this->enderecoRelativoEncurtado .=  $enderecoRelativoCifrado;
     }
 }

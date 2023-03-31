@@ -1,19 +1,21 @@
 <?php
 class EncurtadorHashBasicoServiceDecorator extends UrlDecorator{
     public function encurtarLink(){
-        if(!empty($this->encurtadorLink->get_enderecoAbsoluto())){
+        if(!empty($this->encurtadorLink->get_enderecoRelativoReal())){
             
-            $enderecoRelativo = $this->recuperarEnderecoRelativo($this->encurtadorLink->get_enderecoAbsoluto());
+            $enderecoRelativo = $this->encurtadorLink->get_enderecoRelativoReal();
             $enderecoRelativoCifrado = $this->cifrar($enderecoRelativo);
-            $this->encurtadorLink->set_enderecoRelativoReal();
-            $enderecoAbsolutoCifrado = self::DOMINIO . "$enderocoRelativoCifrado";
+            $this->encurtadorLink->set_enderecoRelativoEncurtado($enderecoRelativoCifrado);
+            //$enderecoAbsolutoCifrado = "$enderocoRelativoCifrado";
+            //print_r($this->encurtadorLink->get_enderecoRelativoReal());
+            //die;
             
         }
         
-        return $enderecoAbsolutoCifrado;
+        return $this->encurtadorLink->get_enderecoRelativoEncurtado();
     }
     
-    public function cifrar(){
+    private function cifrar($enderecoRelativo){
         $enderecoHash = md5($enderecoRelativo);
         
         return $enderecoHash;
