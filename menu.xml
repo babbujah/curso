@@ -298,4 +298,19 @@
             </menuitem>
         </menu>
     </menuitem>
+    
+    <menuitem label='Datagrids'>
+        <icon>fa:cog fa-fw</icon>
+        <menu>
+            <menuitem label='Datagrid Básico'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DataGridBootstrap</action>
+            </menuitem>
+            <menuitem label='Datagrid Grupo de Ações'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DataGridGrupoAcoes</action>
+            </menuitem>
+            
+        </menu>
+    </menuitem>
 </menu>
