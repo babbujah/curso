@@ -302,13 +302,45 @@
     <menuitem label='Datagrids'>
         <icon>fa:cog fa-fw</icon>
         <menu>
-            <menuitem label='Datagrid Básico'>
+            <menuitem label='Datagrid'>
                 <icon>fa:circle fa-fw</icon>
                 <action>DataGridBootstrap</action>
             </menuitem>
-            <menuitem label='Datagrid Grupo de Ações'>
+            <menuitem label='Grupo de Ações'>
                 <icon>fa:circle fa-fw</icon>
                 <action>DataGridGrupoAcoes</action>
+            </menuitem>
+            <menuitem label='Ação Condicional'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DatagridAcaoCondicional</action>
+            </menuitem>
+            <menuitem label='Rolagem Horizontal'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DatagridScrollHorizontal</action>
+            </menuitem>
+            <menuitem label='Rolagem Vertical'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DatagridScrollVertical</action>
+            </menuitem>
+            <menuitem label='Colunas escondidas'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DatagridColunasEscondidas</action>
+            </menuitem>
+            <menuitem label='Datatables'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DatagridDataTables</action>
+            </menuitem>
+            <menuitem label='Datagrid Busca'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DatagridBusca</action>
+            </menuitem>
+            <menuitem label='Datagrid formatação'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DatagridFormatacao</action>
+            </menuitem>
+            <menuitem label='Datagrid links'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DatagridLinks</action>
             </menuitem>
             
         </menu>
