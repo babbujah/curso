@@ -342,6 +342,22 @@
                 <icon>fa:circle fa-fw</icon>
                 <action>DatagridLinks</action>
             </menuitem>
+            <menuitem label='Datagrid com Cálculos'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DatagridCalculos</action>
+            </menuitem>
+            <menuitem label='Datagrid com Imagem'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DatagridImagem</action>
+            </menuitem>
+            <menuitem label='Datagrid Exporta'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DataGridExporta</action>
+            </menuitem>
+            <menuitem label='Datagrid Input'>
+                <icon>fa:circle fa-fw</icon>
+                <action>DataGridInput</action>
+            </menuitem>
             
         </menu>
     </menuitem>
