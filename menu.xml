@@ -361,4 +361,18 @@
             
         </menu>
     </menuitem>
+    <menuitem label='Cadastros'>
+        <icon>fa:cog fa-fw</icon>
+        <menu>
+            <menuitem label='Cidades'>
+                <icon>fa:circle fa-fw</icon>
+                <action>CidadeForm</action>
+            </menuitem>
+            <menuitem label='Cidades Trait'>
+                <icon>fa:circle fa-fw</icon>
+                <action>CidadeTraitForm</action>
+            </menuitem>
+            
+        </menu>
+    </menuitem>
 </menu>
