@@ -57,8 +57,8 @@ class CidadeForm extends TPage{
         try{
             TTransaction::open('cursoOld');
             
-            if(isset($param['id'])){
-                $key = $param['id'];
+            if(isset($param['key'])){
+                $key = $param['key'];
                 $cidade = new Cidade($key);
                 $this->form->setData($cidade);
                 
