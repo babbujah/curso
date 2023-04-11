@@ -372,6 +372,14 @@
                 <icon>fa:circle fa-fw</icon>
                 <action>CidadeTraitForm</action>
             </menuitem>
+            <menuitem label='Cidades Lista'>
+                <icon>fa:circle fa-fw</icon>
+                <action>CidadeList</action>
+            </menuitem>
+            <menuitem label='Cidades Lista Trait'>
+                <icon>fa:circle fa-fw</icon>
+                <action>CidadeTraitList</action>
+            </menuitem>
             
         </menu>
     </menuitem>

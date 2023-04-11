@@ -1,11 +1,23 @@
 <?php
 class CidadeList extends TPage{
+    private $form;
     private $datagrid;
     private $pageNavegation;
     private $loaded;
     
     public function __construct(){
         parent::__construct();
+        
+        $this->form = new BootstrapFormBuilder;
+        $this->form->setFormTitle('Cidades');        
+        
+        $nome = new TEntry('nome');
+        $nome->setValue(TSession::getValue('CidadeList_nome'));
+        
+        $this->form->addFields([new TLabel('Nome')], [$nome]);
+        
+        $this->form->addAction('Buscar', new TAction([$this, 'onSearch']), 'fa:search blue');
+        $this->form->addActionLink('Novo', new TAction(['CidadeForm', 'onClear']), 'fa:plus-circle green');
         
         $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
         $this->datagrid->width = '100%';
@@ -14,9 +26,8 @@ class CidadeList extends TPage{
         $col_nome = new TDataGridColumn('nome', 'Nome', 'left', '60%');
         $col_estado = new TDataGridColumn('estado->nome', 'Estado', 'center', '30%');
         
-        /**
-        ordenação
-        **/
+        $col_id->setAction(new TAction([$this, 'onReload']), ['order' => 'id']);
+        $col_nome->setAction(new TAction([$this, 'onReload']), ['order' => 'nome']);
         
         $this->datagrid->addColumn($col_id);
         $this->datagrid->addColumn($col_nome);
@@ -31,20 +42,18 @@ class CidadeList extends TPage{
         $this->datagrid->createModel();
         
         $this->pageNavegation = new TPageNavigation;
-        $this->pageNavegation->setAction(new TAction([$this, 'onReload']));
-        
-        /**
-        $vbox = new TVBox;
-        $vbox->style = 'width:100%';
-        $vbox->add($this->datagrid);
-        $vbox->add($this->pageNavegation);
-        **/
+        $this->pageNavegation->setAction(new TAction([$this, 'onReload']));        
         
         $panel = new TPanelGroup;
         $panel->add($this->datagrid);
         $panel->addFooter($this->pageNavegation);
         
-        parent::add($panel);
+        $vbox = new TVBox;
+        $vbox->style = 'width:100%';
+        $vbox->add($this->form);
+        $vbox->add($panel);
+        
+        parent::add($vbox);
     }
     
     public function show(){
@@ -55,17 +64,40 @@ class CidadeList extends TPage{
         
     }
     
+    public function onSearch($param){
+        $data = $this->form->getData();
+        
+        if(isset($data->nome)){
+            $filter = new TFilter('nome', 'like', "%{$data->nome}%");
+            
+            TSession::setValue('CidadeList_filter', $filter);
+            TSession::setValue('CidadeList_nome', $data->nome);
+            
+            $this->form->setData($data);
+        }
+        
+        $this->onReload([]);
+    }
+    
     public function onReload($param){
         try{
             TTransaction::open('cursoOld');
             
             $repository = new TRepository('Cidade');
             
+            if(empty($param['order'])){
+                $param['order'] = 'id';
+                $param['direction'] = 'asc';
+            }
             $limit = 10;
             
             $criteria = new TCriteria;
             $criteria->setProperty('limit', $limit);
             $criteria->setProperties($param);
+                        
+            if(TSession::getValue('CidadeList_filter')){
+                $criteria->add(TSession::getValue('CidadeList_filter'));
+            }
             
             $cidades = $repository->load($criteria);
             
@@ -92,6 +124,29 @@ class CidadeList extends TPage{
             new TMessage('error', $e->getMessage());
         }
     }
-    public static function onDelete($param){}
+    public static function onDelete($param){
+        $action = new TAction([__CLASS__, 'Delete']);
+        $action->setParameters($param);
+        new TQuestion('Deseja excluir o registro?', $action);
+    }
+    
+    public static function Delete($param){
+        try{
+            TTransaction::open('cursoOld');
+            
+            $key = $param['key'];
+            
+            $cidade = new Cidade;
+            $cidade->delete($key);
+            
+            $pos_action = new TAction([__CLASS__, 'onReload']);
+            new TMessage('info', 'Registro excluído', $pos_action);
+            
+            TTransaction::close();
+        }catch(Exception $e){
+            new TMessage('error', $e->getMessage());
+            TTransaction::rollback();
+        }
+    }
     
 }
