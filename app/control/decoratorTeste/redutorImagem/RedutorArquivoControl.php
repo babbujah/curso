@@ -12,7 +12,8 @@ class RedutorArquivoControl extends TPage {
                 
                 //$this->exibirListaArquivo();
                 
-                $redutorArquivo = new RedutorArquivoJPG( $this->itensDiretorio[2] );
+                $destino = 'app/images/imgTeste/teste.jpg';
+                $redutorArquivo = new RedutorArquivoJPG( 'app/images/123.jpg', $destino, 60 );
                 $redutorArquivo->reduzirArquivo();
                 
                 //$this->reduzirArquivos();
