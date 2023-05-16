@@ -334,10 +334,10 @@ class Linux extends Unixcommon
         }
 
         // Seconds
-        list($seconds) = explode(' ', $contents, 1);
+        list($seconds,) = explode(' ', $contents);
 
         // Get it textual, as in days/minutes/hours/etc
-        $uptime = Common::secondsConvert(ceil($seconds));
+        $uptime = Common::secondsConvert(ceil((float)$seconds));
 
         // Now find out when the system was booted
         $contents = Common::getContents('/proc/stat', false);
@@ -377,7 +377,7 @@ class Linux extends Unixcommon
         // Get partitions
         $partitions = [];
         $partitions_contents = Common::getContents('/proc/partitions');
-        if (@preg_match_all('/(\d+)\s+([a-z]{3})(\d+)$/m', $partitions_contents, $partitions_match, PREG_SET_ORDER) > 0) {
+        if (@preg_match_all('/(\d+)\s+([a-z]{3}|nvme\d+n\d+|[a-z]+\d+)(p?\d+)$/m', $partitions_contents, $partitions_match, PREG_SET_ORDER) > 0) {
             // Go through each match
             foreach ($partitions_match as $partition) {
                 $partitions[$partition[2]][] = array(
@@ -391,7 +391,7 @@ class Linux extends Unixcommon
         $drives = [];
 
         // Get actual drives
-        foreach ((array) @glob('/sys/block/*/device/model', GLOB_NOSORT) as $path) {
+        foreach ((array) @glob('/sys/block/*/device/uevent', GLOB_NOSORT) as $path) {
 
             // Parts of the path
             $parts = explode('/', $path);
@@ -406,9 +406,19 @@ class Linux extends Unixcommon
                 list(, $reads, $writes) = $statMatches;
             }
 
+            $type = '';
+
+            if (Common::getContents(dirname(dirname($path)).'/queue/rotational') == 0) {
+                if (Common::getContents(dirname($path).'/type') == 'SD') {
+                    $type = ' (SD)';
+                } else {
+                    $type = ' (SSD)';
+                }
+            }
+
             // Append this drive on
             $drives[] = array(
-                'name' => Common::getContents($path, 'Unknown').(Common::getContents(dirname(dirname($path)).'/queue/rotational') == 0 ? ' (SSD)' : ''),
+                'name' => Common::getContents(dirname($path).'/model', 'Unknown').$type,
                 'vendor' => Common::getContents(dirname($path).'/vendor', 'Unknown'),
                 'device' => '/dev/'.$parts[3],
                 'reads' => $reads,
@@ -523,11 +533,11 @@ class Linux extends Unixcommon
             // Wacky location
             foreach ((array) @glob('/sys/class/hwmon/hwmon*/{,device/}*_input', GLOB_NOSORT | GLOB_BRACE) as $path) {
                 $initpath = rtrim($path, 'input');
-                $value = Common::getContents($path);
+                $value = Common::getIntFromFile($path);
                 $base = basename($path);
                 $labelpath = $initpath.'label';
                 $showemptyfans = isset($this->settings['temps_show0rpmfans']) ? $this->settings['temps_show0rpmfans'] : false;
-                $drivername = @basename(@readlink(dirname($path).'/driver')) ?: false;
+                $drivername = basename(@readlink(dirname($path).'/driver')) ?: false;
 
                 // Temperatures
                 if (is_file($labelpath) && strpos($base, 'temp') === 0) {
@@ -679,9 +689,13 @@ class Linux extends Unixcommon
             $mount[2] = stripcslashes($mount[2]);
 
             // Get these
-            $size = @disk_total_space($mount[2]);
-            $free = @disk_free_space($mount[2]);
-            $used = $size != false && $free != false ? $size - $free : false;
+            if (is_readable($mount[2])) {
+                $size = disk_total_space($mount[2]);
+                $free = disk_free_space($mount[2]);
+                $used = $size != false && $free != false ? $size - $free : false;
+            }else{
+                $size = $free = $used = false;
+            }
 
             // If it's a symlink, find out where it really goes.
             // (using realpath instead of readlink because the former gives absolute paths)
@@ -692,7 +706,7 @@ class Linux extends Unixcommon
             }
 
             // Optionally get mount options
-            if ($this->settings['show']['mounts_options'] && !in_array($mount[3], (array) $this->settings['hide']['fs_mount_options'])) {
+            if (isset($this->settings['show']['mounts_options']) && $this->settings['show']['mounts_options'] && !in_array($mount[3], (array) $this->settings['hide']['fs_mount_options'])) {
                 $mount_options = explode(',', $mount[4]);
             } else {
                 $mount_options = [];
@@ -746,8 +760,7 @@ class Linux extends Unixcommon
         $usb_ids || Errors::add('Linux Device Finder', 'Cannot find usb.ids; ensure usbutils is installed.');
 
         // Class that does it
-        $hw = new Hwpci($usb_ids, $pci_ids);
-        $hw->work('linux');
+        $hw = new Hwpci($usb_ids, $pci_ids, 'linux', true);
 
         return $hw->result();
     }
@@ -942,13 +955,23 @@ class Linux extends Unixcommon
             if (!$type) {
                 $type_contents = strtoupper(Common::getContents($path.'/device/modalias'));
                 list($type_match) = explode(':', $type_contents, 2);
+                $uevent_contents = @parse_ini_file($path.'/uevent');
+                $device_uevent_contents = @parse_ini_file($path.'/device/uevent');
 
-                if (in_array($type_match, array('PCI', 'USB'))) {
+                if ($uevent_contents != false && isset($uevent_contents['DEVTYPE'])) {
+                  $type = ucfirst($uevent_contents['DEVTYPE']);
+                    if (in_array($type_match, array('PCI', 'USB'))){
+                        $type .= ' ('.$type_match.')';
+                    }
+                    if ($device_uevent_contents != false && isset($device_uevent_contents['DRIVER'])) {
+                        $type .= ' ('.$device_uevent_contents['DRIVER'].')';
+                    }
+                } elseif (in_array($type_match, array('PCI', 'USB'))) {
                     $type = 'Ethernet ('.$type_match.')';
 
                     // Driver maybe?
-                    if (($uevent_contents = @parse_ini_file($path.'/device/uevent')) && isset($uevent_contents['DRIVER'])) {
-                        $type .= ' ('.$uevent_contents['DRIVER'].')';
+                    if ($device_uevent_contents != false && isset($device_uevent_contents['DRIVER'])) {
+                        $type .= ' ('.$device_uevent_contents['DRIVER'].')';
                     }
                 } elseif ($type_match == 'VIRTIO') {
                     $type = 'VirtIO';
@@ -985,7 +1008,7 @@ class Linux extends Unixcommon
                 // These were determined above
                 'state' => $state,
                 'type' => $type ?: 'N/A',
-                'port_speed' => $speed > 0 ? $speed : false,
+                'port_speed' => $speed > 0 ? $speed * 1000 * 1000 : false,
             );
         }
 
@@ -1021,18 +1044,16 @@ class Linux extends Unixcommon
             }
 
             // Get these from the simple text files
-            switch (true) {
-                case is_file($b.'/energy_full'):
-                    $charge_full = Common::getIntFromFile($b.'/energy_full');
-                    $charge_now = Common::getIntFromFile($b.'/energy_now');
-                    break;
-                case is_file($b.'/charge_full'):
-                    $charge_full = Common::getIntFromFile($b.'/charge_full');
-                    $charge_now = Common::getIntFromFile($b.'/charge_now');
-                    break;
-                default:
-                    continue;
-                    break;
+            if (is_file($b.'/energy_full')) {
+                $charge_full = Common::getIntFromFile($b.'/energy_full');
+                $charge_now = Common::getIntFromFile($b.'/energy_now');
+            }
+            else if (is_file($b.'/charge_full')) {
+                $charge_full = Common::getIntFromFile($b.'/charge_full');
+                $charge_now = Common::getIntFromFile($b.'/charge_now');
+            }
+            else {
+                continue;
             }
 
             // Alleged percentage
@@ -1332,7 +1353,7 @@ class Linux extends Unixcommon
                     // State section
                     case 'State':
                         switch ($status_matches[$i][2]) {
-                            case 'D': // disk sleep? wtf?
+                            case 'D': // blocked on disk IO
                             case 'S':
                                 $state = 'Up (Sleeping)';
                             break;
@@ -1346,9 +1367,6 @@ class Linux extends Unixcommon
                             // stopped
                             case 'T':
                                 $state = 'Up (Stopped)';
-                            break;
-                            default:
-                                continue;
                             break;
                         }
                     break;
@@ -1408,6 +1426,17 @@ class Linux extends Unixcommon
         // - And even also supports empty files, and just uses said file to identify the distro and ignore version
 
         $contents_distros = array(
+            // Various redhat flavors/derivs
+            array(
+                'file' => '/etc/fedora-release',
+                'regex' => '/^Fedora(?: Core)? release (?P<version>\d+) \((?P<codename>[^)]+)\)$/',
+                'distro' => 'Fedora',
+            ),
+            array(
+                'file' => '/etc/oracle-release',
+                'regex' => '/^Oracle Linux Server release (?P<version>[\d\.]+)/',
+                'distro' => 'Oracle',
+            ),
             array(
                 'file' => '/etc/redhat-release',
                 'regex' => '/^CentOS.+release (?P<version>[\d\.]+) \((?P<codename>[^)]+)\)$/i',
@@ -1418,6 +1447,8 @@ class Linux extends Unixcommon
                 'regex' => '/^Red Hat.+release (?P<version>\S+) \((?P<codename>[^)]+)\)$/i',
                 'distro' => 'RedHat',
             ),
+
+            // Should catch most distros (Ubuntu/etc)
             array(
                 'file' => '/etc/lsb-release',
                 'closure' => function ($ini) {
@@ -1442,11 +1473,7 @@ class Linux extends Unixcommon
                     ) : false;
                  },
             ),
-            array(
-                'file' => '/etc/fedora-release',
-                'regex' => '/^Fedora(?: Core)? release (?P<version>\d+) \((?P<codename>[^)]+)\)$/',
-                'distro' => 'Fedora',
-            ),
+
             array(
                 'file' => '/etc/gentoo-release',
                 'regex' => '/(?P<version>[\d\.]+)$/',
@@ -1487,7 +1514,7 @@ class Linux extends Unixcommon
                     'name' => $distro['distro'],
                     'version' => $info['version'].(isset($info['codename']) ? ' ('.ucfirst($info['codename']).')' : ''),
                 );
-            } elseif (isset($distro['distro'])) {
+            } elseif (isset($distro['distro']) && !isset($distro['regex'])) {
                 return array(
                     'name' => $distro['distro'],
                     'version' => $contents,
@@ -1589,12 +1616,19 @@ class Linux extends Unixcommon
             return array('type' => 'guest', 'method' => 'OpenVZ');
         }
 
+        $bios_vendor = Common::getContents('/sys/devices/virtual/dmi/id/bios_vendor');
+
         // Veertu guest?
-        if (Common::getContents('/sys/devices/virtual/dmi/id/bios_vendor') == 'Veertu') {
+        if ($bios_vendor == 'Veertu') {
             return array('type' => 'guest', 'method' => 'Veertu');
         }
 
-	// LXC guest?
+        // Parallels guest?
+        if (strpos($bios_vendor, 'Parallels') === 0) {
+            return array('type' => 'guest', 'method' => 'Parallels');
+        }
+
+        // LXC guest?
         if (strpos(Common::getContents('/proc/mounts'), 'lxcfs /proc/') !== false) {
             return array('type' => 'guest', 'method' => 'LXC');
         }

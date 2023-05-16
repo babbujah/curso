@@ -12,11 +12,24 @@ class RedutorArquivoControl extends TPage {
                 
                 //$this->exibirListaArquivo();
                 
-                $destino = 'app/images/imgTeste/teste.jpg';
-                $redutorArquivo = new RedutorArquivoJPG( 'app/images/123.jpg', $destino, 60 );
-                $redutorArquivo->reduzirArquivo();
+                //$destino = 'app/images/imgTeste/teste123.jpg';
+                //$redutorArquivo = new RedutorArquivoJPG( 'app/images/123.jpg', $destino, 60 );
+                                
+                //$destino = 'app/images/imgTeste/teste345.gif';
+                //$redutorArquivo = new RedutorArquivoGIF( 'app/images/345.gif', $destino );
                 
-                //$this->reduzirArquivos();
+                //$destino = 'app/images/imgTeste/teste678.png';
+                //$redutorArquivo = new RedutorArquivoPNG( 'app/images/678.png', $destino, 10 );
+                
+                //$destino = 'app/images/imgTeste/pdftemp/TESTE910teste.pdf';
+                //$redutorArquivo = new RedutorArquivoPDF( 'app/images/910TESTE.pdf', $destino, 12 );
+                
+                
+                //$redutorArquivo->reduzirArquivo();
+                
+                //$redutorArquivo->exibirDados();
+                
+                $this->reduzirArquivos();
                 
             }else{
                 throw new Exception( 'Caminho das pastas inválido.' );
@@ -36,18 +49,67 @@ class RedutorArquivoControl extends TPage {
     }
     
     private function reduzirArquivos(){
-        
-        
-        foreach( $this->itensDiretorio as $item ){
-            $redutorArquivo = $this->gerarRedutorArquivo( $item );
-            if( $redutorArquivo instanceof RedutorArquivo ){
-                continue;
+        try{
+            foreach( $this->itensDiretorio as $item ){
+                $redutorArquivo = $this->gerarRedutorArquivo( $item );
+                if( $redutorArquivo instanceof RedutorArquivo ){
+                    $redutorArquivo->reduzirArquivo();
+                    
+                    echo '<br>Reduziu '. $item;
+                    
+                    
+                }else{
+                    echo '<br>Arquivo '. $item. ' não reduzido.';
+                    
+                }
+                
                 
             }
-            echo '<br>Reduziu '. $item;
-            //$redutorArquivo->reduzirArquivo();
+        }catch( Exception $e ){
+            new TMessage( 'error', $e->getMessage() );
         }
         
+        
+        
+    }
+    
+    private function gerarRedutorArquivo( $caminhoAbsolutoArquivo ){
+        
+        $pathinfo = pathinfo( $caminhoAbsolutoArquivo );
+        $diretorio = $pathinfo['dirname'];
+        $nomeArquivo = $pathinfo['filename'];
+        $extensao = $pathinfo['extension'];
+        $destino = $diretorio.'/imgTeste/'.$nomeArquivo.'_TESTE.'.$extensao;    
+        
+        $redutorArquivo = NULL;
+        switch( $extensao ){
+            case 'jpg':
+                //$destino = 'app/images/imgTeste/'.$nomeArquivo.'_TESTE.'.$extensao;
+                $redutorArquivo = new RedutorArquivoJPG( $caminhoAbsolutoArquivo, $destino, 60 );
+                
+                break;
+                
+            case 'png':
+                //$destino = 'app/images/imgTeste/'.$nomeArquivo.'_TESTE.'.$extensao;
+                $redutorArquivo = new RedutorArquivoPNG( $caminhoAbsolutoArquivo, $destino, 10 );
+                
+                break;
+                
+            case 'gif':
+                //$destino = 'app/images/imgTeste/'.$nomeArquivo.'_TESTE.'.$extensao;
+                $redutorArquivo = new RedutorArquivoGIF( $caminhoAbsolutoArquivo, $destino );
+                
+                break;
+                
+            /*case 'pdf':
+                $destino = $diretorio.'/imgTeste/pdftemp/'.$nomeArquivo.'_TESTE.'.$extensao;
+                $redutorArquivo = new RedutorArquivoPDF( $caminhoAbsolutoArquivo, $destino, 12 );
+                break;*/
+            
+            
+        }
+        
+        return $redutorArquivo;
     }
     
     private function getItensDiretorio( $caminho ){
@@ -74,29 +136,5 @@ class RedutorArquivoControl extends TPage {
         }
     }
     
-    private function gerarRedutorArquivo( $caminhoAbsolutoArquivo ){
-        $pathinfo = pathinfo( $caminhoAbsolutoArquivo );
-        $extensao = $pathinfo['extension'];        
-        $redutorArquivo = NULL;
-        switch( $extensao ){
-            case 'jpg':
-                $pathinfo = pathinfo( $caminhoAbsolutoArquivo );
-                $nomeArquivo = $pathinfo['filename'];
-                //$redutorArquivo = new redutoArquivoJPG($caminhoAbsolutoArquivo);
-                break;
-                
-            case 'png':
-                //$redutorArquivo = new redutoArquivoPNG;
-                break;
-                
-            case 'gif':
-                break;
-                
-            case 'pdf':
-                break;
-            
-        }
-        
-        return $redutorArquivo;
-    }
+    
 }
