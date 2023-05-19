@@ -5,6 +5,7 @@ abstract class RedutorArquivo {
     protected $qualidade;
     protected $fileInfoDe; // dados do caminho de origem [dirname, filename, extension, size, path]
     protected $fileInfoPara; // dados do caminho de destino [dirname, filename, extension, size, path]
+    private $statusConversao = FALSE;
     
     public function __construct( $de, $para = NULL, $qualidade = NULL ){
         $this->de = $de;
@@ -44,6 +45,7 @@ abstract class RedutorArquivo {
             throw new Exception( $caminho. ' Não é um arquivo válido.' );
             
         }
+        
         $pathinfo = pathinfo( $caminho );
         $dirname = $pathinfo['dirname'];
         $filename = $pathinfo['filename'];
@@ -60,10 +62,23 @@ abstract class RedutorArquivo {
         
     }
     
-    public function reduzirArquivo( ){
-        //$redutoArquivoService = new RegistroArquivoReduzidoService( $infoPathArquivo );
-        //$redutoArquivoService->salvar();
+    protected function setStatusConvesao(){
+        $this->statusConversao = TRUE;
+        
+    }
     
+    protected function getStatusConversao(){
+        return $this->statusConversao;
+        
+    }
+    
+    public function reduzirArquivo( ){
+        
+        /*if( $this->statusConversao ){
+            $this->salvar();
+        }else{
+            throw new Exception( 'Não houve a conversão com sucesso.' );
+        }*/
     }
     
     public function exibirDados(){

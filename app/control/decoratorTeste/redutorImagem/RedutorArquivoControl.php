@@ -49,19 +49,40 @@ class RedutorArquivoControl extends TPage {
     }
     
     private function reduzirArquivos(){
+        $arquivoService = new ArquivoService;
+        
         try{
             foreach( $this->itensDiretorio as $item ){
-                $redutorArquivo = $this->gerarRedutorArquivo( $item );
+                $arquivo = $arquivoService->findArquivoByPath( $item );
+                if( !empty($arquivo->id)   ){
+                    echo '<br>O arquivo '.$item.' existe.';
+                    
+                }else{
+                    echo '<br>O arquivo '.$item.' não existe.';
+                }
+                
+                
+                
+                /*$redutorArquivo = $this->gerarRedutorArquivo( $item );
+                
                 if( $redutorArquivo instanceof RedutorArquivo ){
+                    
+                    
+                                        
                     $redutorArquivo->reduzirArquivo();
                     
-                    echo '<br>Reduziu '. $item;
+                    if( $redutorArquivo->getStatusConversao ){
+                        echo '<br>Reduziu '. $item;
+                            
+                    }
+                    
+                    
                     
                     
                 }else{
                     echo '<br>Arquivo '. $item. ' não reduzido.';
                     
-                }
+                }*/
                 
                 
             }
@@ -73,14 +94,39 @@ class RedutorArquivoControl extends TPage {
         
     }
     
+    private function salvar(){
+        try{
+            TTransaction::open( 'reduto_arquivo.ini' );
+            
+            $arquivo = new Arquivo;
+            $arquivo->dirname = $this->fileInfoDe['dirname'];
+            $arquivo->filename = $this->fileInfoDe['filename'];
+            $arquivo->size_original = $this->fileInfoDe['size'];
+            $arquivo->extension = $this->fileInfoDe['extension'];
+            $arquivo->size_final = $this->fileInfoPara['size'];
+            
+            $arquivo->save();
+            
+            TTransaction::close();
+        
+        }catch( Exception $e ){
+            TTransaction::rollback();
+            new TMessage('error', $e->getMessage());
+            
+        }
+        
+    }
+    
     private function gerarRedutorArquivo( $caminhoAbsolutoArquivo ){
         
         $pathinfo = pathinfo( $caminhoAbsolutoArquivo );
         $diretorio = $pathinfo['dirname'];
         $nomeArquivo = $pathinfo['filename'];
         $extensao = $pathinfo['extension'];
-        $destino = $diretorio.'/imgTeste/'.$nomeArquivo.'_TESTE.'.$extensao;    
-        
+        $tamanhoArquivo = filesize( $caminhoAbsolutoArquivo );
+        //$destino = $diretorio.'/imgTeste/'.$nomeArquivo.'_TESTE.'.$extensao;
+        $destino = 'app/images/imgTeste/'.$nomeArquivo.'_TESTE.'.$extensao;
+                
         $redutorArquivo = NULL;
         switch( $extensao ){
             case 'jpg':
@@ -102,12 +148,17 @@ class RedutorArquivoControl extends TPage {
                 break;
                 
             /*case 'pdf':
-                $destino = $diretorio.'/imgTeste/pdftemp/'.$nomeArquivo.'_TESTE.'.$extensao;
-                $redutorArquivo = new RedutorArquivoPDF( $caminhoAbsolutoArquivo, $destino, 12 );
+                if( $tamanhoArquivo >= 100000 ){
+                    $destino = $diretorio.'/pdftemp/'.$nomeArquivo.'_TESTE.'.$extensao;
+                    $redutorArquivo = new RedutorArquivoPDF( $caminhoAbsolutoArquivo, $destino, 12 );
+                    
+                }
+                
                 break;*/
             
             
         }
+        
         
         return $redutorArquivo;
     }
@@ -116,7 +167,7 @@ class RedutorArquivoControl extends TPage {
          if( is_dir( $caminho ) ){
             $itens = scandir( $caminho );
             foreach( $itens as $item ){
-                if( $item == '.' || $item == '..' ){
+                if( $item == '.' || $item == '..' || $item == 'pdftemp' || $item == 'imgTeste' ){
                     continue;
                     
                 }

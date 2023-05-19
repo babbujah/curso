@@ -10,5 +10,7 @@ class RedutorArquivoGIF extends RedutorArquivo{
         }
         
         $this->setFileInfoPara();
+        
+        $this->setStatusConvesao();
     } 
 }

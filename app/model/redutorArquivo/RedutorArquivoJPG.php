@@ -12,5 +12,10 @@ class RedutorArquivoJPG extends RedutorArquivo{
         
         $this->setFileInfoPara();
         
-    }   
+        $this->setStatusConvesao();
+        
+        //parent::reduzirArquivo();
+        
+    }
+    
 }

@@ -13,5 +13,7 @@ class RedutorArquivoPNG extends RedutorArquivo{
         }
         
         $this->setFileInfoPara();
+        
+        $this->setStatusConvesao();
     }
 }

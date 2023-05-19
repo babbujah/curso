@@ -58,6 +58,8 @@ class RedutorArquivoPDF extends RedutorArquivo{
         
         $this->setFileInfoPara();
         
+        $this->setStatusConvesao();
+        
         /*$image = new Imagick();
         $image->newImage(1, 1, new ImagickPixel('#ffffff'));
         $image->setImageFormat('png');
