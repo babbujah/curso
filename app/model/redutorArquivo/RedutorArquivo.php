@@ -16,7 +16,7 @@ abstract class RedutorArquivo {
         
     }
     
-    protected function getFileInfoDe(){
+    public function getFileInfoDe(){
         //$this->fileInfoDe = $this->getFileInfo( $this->de );
         
         return $this->fileInfoDe;
@@ -28,7 +28,7 @@ abstract class RedutorArquivo {
         
     }
     
-    protected function getFileInfoPara(){
+    public function getFileInfoPara(){
         //$this->fileInfoPara = $this->getFileInfo( $this->para );
         
         return $this->fileInfoPara;

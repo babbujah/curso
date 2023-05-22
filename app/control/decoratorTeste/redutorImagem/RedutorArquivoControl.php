@@ -50,70 +50,55 @@ class RedutorArquivoControl extends TPage {
     
     private function reduzirArquivos(){
         $arquivoService = new ArquivoService;
+        $redutorArquivo = null;
+        
+        $qntTotalArquivo = 0;
+        $tamanhoOriginalTotal = 0;
+        $tamanhoFinalTotal = 0;
         
         try{
             foreach( $this->itensDiretorio as $item ){
                 $arquivo = $arquivoService->findArquivoByPath( $item );
-                if( !empty($arquivo->id)   ){
-                    echo '<br>O arquivo '.$item.' existe.';
-                    
-                }else{
-                    echo '<br>O arquivo '.$item.' não existe.';
-                }
+                $pathinfo = pathinfo( $item );
+                $arquivo->size_original = filesize( $item );
+                $arquivo->extension = $pathinfo['extension'];
                 
-                
-                
-                /*$redutorArquivo = $this->gerarRedutorArquivo( $item );
-                
-                if( $redutorArquivo instanceof RedutorArquivo ){
+                if( $arquivo->size_final == null ){
                     
+                    $redutorArquivo = $this->gerarRedutorArquivo( $item );
                     
-                                        
-                    $redutorArquivo->reduzirArquivo();
+                    if( !empty($redutorArquivo) ){
+                        $redutorArquivo->reduzirArquivo();
+                        $arquivo->size_final = $redutorArquivo->getFileInfoPara()['size'];
                     
-                    if( $redutorArquivo->getStatusConversao ){
-                        echo '<br>Reduziu '. $item;
-                            
                     }
                     
+                    //$arquivoService->save( $arquivo );
+                        
+                    $qntTotalArquivo ++;
+                    $tamanhoOriginalTotal += $arquivo->size_original;
+                    $tamanhoFinalTotal += $arquivo->size_final;
                     
-                    
-                    
-                }else{
-                    echo '<br>Arquivo '. $item. ' não reduzido.';
-                    
-                }*/
-                
-                
+                }
             }
-        }catch( Exception $e ){
-            new TMessage( 'error', $e->getMessage() );
-        }
-        
-        
-        
-    }
-    
-    private function salvar(){
-        try{
-            TTransaction::open( 'reduto_arquivo.ini' );
             
-            $arquivo = new Arquivo;
-            $arquivo->dirname = $this->fileInfoDe['dirname'];
-            $arquivo->filename = $this->fileInfoDe['filename'];
-            $arquivo->size_original = $this->fileInfoDe['size'];
-            $arquivo->extension = $this->fileInfoDe['extension'];
-            $arquivo->size_final = $this->fileInfoPara['size'];
+            TTransaction::open('redutor_arquivo');
             
-            $arquivo->save();
+            $registroArquivo = new RegistroArquivos;
+            
+            $registroArquivo->qnt_files = $qntTotalArquivo;
+            $registroArquivo->size_total_files_original = $tamanhoOriginalTotal;
+            $registroArquivo->size_total_files_reduced = $tamanhoFinalTotal;
+            $registroArquivo->store();
             
             TTransaction::close();
-        
+            
         }catch( Exception $e ){
-            TTransaction::rollback();
-            new TMessage('error', $e->getMessage());
+            new TMessage( 'error', $e->getMessage() );
             
         }
+        
+        
         
     }
     
@@ -137,7 +122,7 @@ class RedutorArquivoControl extends TPage {
                 
             case 'png':
                 //$destino = 'app/images/imgTeste/'.$nomeArquivo.'_TESTE.'.$extensao;
-                $redutorArquivo = new RedutorArquivoPNG( $caminhoAbsolutoArquivo, $destino, 10 );
+                $redutorArquivo = new RedutorArquivoPNG( $caminhoAbsolutoArquivo, $destino, 60 );
                 
                 break;
                 

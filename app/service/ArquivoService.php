@@ -32,9 +32,11 @@ class ArquivoService{
             
             $arquivo = Arquivo::firstOrNew($filters);
             
+            TTransaction::close();
+            
             return $arquivo;
             
-            $criteria = new TCriteria;
+            /*$criteria = new TCriteria;
             $criteria->add( new TFilter( 'dirname', '=', $dirname ) );
             $criteria->add( new TFilter( 'filename', '=', $filename ) );
             
@@ -44,11 +46,11 @@ class ArquivoService{
             if( $repository->count() == 1 ){
                 $arquivo = $repository->first();
                 
-            }
+            }*/
             
-            TTransaction::close();
+            //TTransaction::close();
             
-            return $arquivo;
+            //return $arquivo;
             
         }catch( Exception $e ){
             new TMessage( 'error', $e->getMessage() );
