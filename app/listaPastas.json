@@ -1,0 +1,5 @@
+{
+    "título": "Pastas para compressão",
+    "diretorio_base": "C:\\wamp64\\www\\curso\\app\\images\\",
+    "pastas": ["app/images/01", "02", "2015", "2016", "../../wp-content/2015"]
+}

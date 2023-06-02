@@ -45,4 +45,6 @@ app/output
 
 # Others
 tmp/
+app/images
+app/images2
 

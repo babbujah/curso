@@ -1,16 +1,16 @@
 <?php
 /**
-* Classe concreta que define um redutor de arquivos do tipo .png.
+* Classe concreta que define um redutor de arquivos do tipo .webp.
 *
 * @version    1.0
 * @package    model.redutorarquivo
 * @author     Bruno Lopes
 * @since      23/05/2023  
 **/
-class RedutorArquivoPNG extends RedutorArquivo{
+class RedutorArquivoWebp extends RedutorArquivo{
     
     /**
-     * Função definida para a compressão de arquivos .png.
+     * Função definida para a compressão de arquivos .webp.
      *
      * @author Bruno Lopes
      * @since  23/05/2023
@@ -20,19 +20,17 @@ class RedutorArquivoPNG extends RedutorArquivo{
         $nomeArquivo = $this->getFileInfoDe()['filename'];
         $extensao = $this->getFileInfoDe()['extension'];
         
-        if( $info['mime'] == 'image/png' ){
-            $imagem = @imagecreatefrompng( $this->de );
-            $qualidade = round( empty( $this->qualidade ) ? 7 : 9 - ($this->qualidade * 9 / 100) ); // Converte a qualidade recebida no internalo de 0 (sem compressão) a 9 e, caso seja nula, define como 7
-            imagesavealpha( $imagem, true ); // Mantém o fundo original da imagem
+        if( $info['mime'] == 'image/webp' ){
+            $imagem = @imagecreatefromwebp( $this->de );
+            
             $destinoTemp = self::DIRETORIO_TEMP.$nomeArquivo.'_TMP.'.$extensao;
-            imagepng( $imagem, $destinoTemp, $qualidade );            
+            imagewebp( $imagem, $destinoTemp, empty( $this->qualidade ) ? -1 : $this->qualidade ); // caso a qualidade não seja informada a taxa de compressão é definida para 75%
             
             $this->copiarArquivoReduzido( $destinoTemp );
             
             $this->setFileInfoPara();
         
             //$this->setStatusCompressao();
-            
         }
     }
 }
